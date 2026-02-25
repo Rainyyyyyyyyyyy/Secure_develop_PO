@@ -3,6 +3,7 @@
 #include <QDirIterator>
 //#include <QFileDialog>
 #include <QDateTime>
+
 #include <iostream>
 
 void print_attribs(QFileInfo& info, QTextStream& stream) {
@@ -46,9 +47,18 @@ void print_all(QString path, QTextStream& stream) {
     }
 }
 
+
 int main(int argc, char *argv[])
 {
-
+    QString dir_path;
+    char *dirr = new char;
+    QTextStream Qst;
+    //Qst>>dir_path;
+    std::cin.getline(dirr, 1);
+    std::cout<<dirr<<'\n';
+    // H:\Documents\Secure_tools_AndreevaVV\papka
+    // H:/Documents/Secure_tools_AndreevaVV/papka
+    print_all(dirr, Qst);
 
     //QCoreApplication a(argc, argv);
     std::cout<<"Hello from Qt and GitKraken\n";

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 10.0.1, 2026-02-25T13:04:15. -->
+<!-- Written by QtCreator 10.0.1, 2026-02-25T14:01:20. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -239,8 +239,9 @@
     <valuelist type="QVariantList" key="CustomOutputParsers"/>
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration://storage-omega.csi.local/Students_Home/st22.284/Documents/Secure_tools_AndreevaVV/lab0/lab0/lab0.pro</value>
-    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">//storage-omega.csi.local/Students_Home/st22.284/Documents/Secure_tools_AndreevaVV/lab0/lab0/lab0.pro</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">lab02</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration://storage-omega.csi.local/Students_Home/st22.284/Documents/Secure_tools_AndreevaVV/TRUE_REPO/Secure_develop_PO/lab0.pro</value>
+    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">//storage-omega.csi.local/Students_Home/st22.284/Documents/Secure_tools_AndreevaVV/TRUE_REPO/Secure_develop_PO/lab0.pro</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
