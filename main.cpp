@@ -52,6 +52,7 @@ int main(int argc, char *argv[])
 
     //QCoreApplication a(argc, argv);
     std::cout<<"Hello from Qt and GitKraken\n";
+    std::cout<<"GitCloned\n";
     return 0;
     //return a.exec();
 }
