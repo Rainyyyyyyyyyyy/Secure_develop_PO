@@ -3,6 +3,18 @@
 #include <QDebug>
 #include <QTextStream>
 #include <windows.h>
+
+
+// написать функцию шифрования
+// написать функицю дешифрования
+// написать функцию проверки шифрованности (не шифровать если зашифровано и наоборот)
+
+// обернуть в класс (синглтон)
+
+
+
+
+// indent - отступ (для вывода)
 void listContents(const QString &path, int indent = 0) {
     QDir dir(path);
 
