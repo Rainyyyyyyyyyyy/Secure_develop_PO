@@ -1,68 +1,67 @@
 #include <QCoreApplication>
+#include <QDir>
+#include <QDebug>
 #include <QTextStream>
-#include <QDirIterator>
-//#include <QFileDialog>
-#include <QDateTime>
+#include <windows.h>
+void listContents(const QString &path, int indent = 0) {
+    QDir dir(path);
 
-#include <iostream>
-
-void print_attribs(QFileInfo& info, QTextStream& stream) {
-    if (info.isReadable())
-        stream << "R";
-    if (info.isWritable())
-        stream << "W";
-    if (info.isHidden())
-        stream << "H";
-    if (info.isExecutable())
-        stream << "E";
-}
-
-
-QString fileSize(qint64 nSize) {
-    qint64 i = 0;
-    for (; nSize > 1023; nSize /= 1024, ++i) { }
-    return QString().setNum(nSize) + "BKMGT"[i];
-}
-
-void print_all(QString path, QTextStream& stream) {
-    QDirIterator itDirs(path, QDir::Dirs);
-    while (itDirs.hasNext()) {
-        itDirs.next();
-        if (itDirs.fileName() == ".")
-            continue;
-        QFileInfo info = itDirs.fileInfo();
-        stream << "D | " << info.fileName() << " | " << fileSize(info.size()) << " | "
-               << info.lastModified().toString() << " | ";
-        print_attribs(info, stream);
-        stream << "\n";
+    // Проверяем, существует ли папка
+    if (!dir.exists()) {
+        qDebug() << "No Folder:" << path;
+        return;
     }
-    QDirIterator itFiles(path, QDir::Files);
-    while (itFiles.hasNext()) {
-        itFiles.next();
-        QFileInfo info = itFiles.fileInfo();
-        stream << "F | " << info.fileName() << " | " << fileSize(info.size()) << " | "
-               << info.lastModified().toString() << " | ";
-        print_attribs(info, stream);
-        stream << "\n";
+
+    // Получаем список всех файлов и папок (включая скрытые)
+    QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
+
+    // Отступ для визуального отображения вложенности
+    QString indentStr(indent * 2, ' ');
+
+    for (const QFileInfo &entry : entries) {
+        if (entry.isDir()) {
+            // Выводим папку
+            qDebug().noquote() << indentStr + "[Folder]" + entry.fileName();
+                                                                   // Рекурсивно обходим содержимое папки
+                                                                   listContents(entry.absoluteFilePath(), indent + 1);
+        } else {
+            // Выводим файл с информацией о размере
+            QString sizeStr;
+            qint64 size = entry.size();
+
+            if (size < 1024) {
+                sizeStr = QString::number(size) + " B";
+            } else if (size < 1024 * 1024) {
+                sizeStr = QString::number(size / 1024.0, 'f', 2) + " KB";
+            } else if (size < 1024 * 1024 * 1024) {
+                sizeStr = QString::number(size / (1024.0 * 1024.0), 'f', 2) + " MB";
+            } else {
+                sizeStr = QString::number(size / (1024.0 * 1024.0 * 1024.0), 'f', 2) + " GB";
+            }
+
+            qDebug().noquote() << indentStr + "[File]" + entry.fileName() + " (" + sizeStr + ")";
+        }
     }
 }
 
+int main(int argc, char *argv[]) {
+    QCoreApplication app(argc, argv);
 
-int main(int argc, char *argv[])
-{
-    QString dir_path;
-    char *dirr = new char;
-    QTextStream Qst;
-    //Qst>>dir_path;
-    std::cin.getline(dirr, 1);
-    std::cout<<dirr<<'\n';
-    // H:\Documents\Secure_tools_AndreevaVV\papka
-    // H:/Documents/Secure_tools_AndreevaVV/papka
-    print_all(dirr, Qst);
+    QString folderPath;
+    QTextStream input(stdin);
+    QTextStream output(stdout);
+    SetConsoleCP(65001);
+    SetConsoleOutputCP(65001);
+    output << "Enter path to folder: ";
+    output.flush();
+    // H:\Documents\Secure_tools_AndreevaVV\TRUE_REPO
+    folderPath = input.readLine().trimmed();
 
-    //QCoreApplication a(argc, argv);
-    std::cout<<"Hello from Qt and GitKraken\n";
-    std::cout<<"GitCloned\n";
+    output << "\nContent of  " << folderPath << ":\n";
+            output << "====================================\n";
+    output.flush();
+
+    listContents(folderPath);
+
     return 0;
-    //return a.exec();
 }
