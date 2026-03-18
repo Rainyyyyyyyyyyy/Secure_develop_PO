@@ -22,8 +22,8 @@ void listContents(const QString &path, int indent = 0) {
         if (entry.isDir()) {
             // Выводим папку
             qDebug().noquote() << indentStr + "[Folder]" + entry.fileName();
-                                                                   // Рекурсивно обходим содержимое папки
-                                                                   listContents(entry.absoluteFilePath(), indent + 1);
+            // Рекурсивно обходим содержимое папки
+            listContents(entry.absoluteFilePath(), indent + 1);
         } else {
             // Выводим файл с информацией о размере
             QString sizeStr;
@@ -55,6 +55,7 @@ int main(int argc, char *argv[]) {
     output << "Enter path to folder: ";
     output.flush();
     // H:\Documents\Secure_tools_AndreevaVV\TRUE_REPO
+    // E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1\Qt\try3_gitclone
     folderPath = input.readLine().trimmed();
 
     output << "\nContent of  " << folderPath << ":\n";
