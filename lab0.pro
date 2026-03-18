@@ -13,3 +13,18 @@ SOURCES += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+# E:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1/lib_Cryptopp_unpacked/cryptopp
+INCLUDEPATH += E:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1/lib_Cryptopp_unpacked/cryptopp
+# INCLUDEPATH += "C:\msys64\ucrt64\include\cryptopp"
+#LIBS += -LC:/msys64/ucrt64/lib -lcryptopp
+LIBS += -LE:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1/lib_Cryptopp_unpacked/cryptopp -lcryptopp
+# Путь к заголовкам Crypto++ (установленным через MSYS2)
+#INCLUDEPATH += C:/msys64/mingw64/include/cryptopp
+
+# Путь к библиотеке
+#LIBS += -LC:/msys64/mingw64/lib -lcryptopp
+
+# Для Windows нужны эти библиотеки
+win32 {
+    LIBS += -lws2_32 -luser32
+}
