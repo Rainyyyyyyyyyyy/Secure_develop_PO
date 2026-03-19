@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QTextStream>
 #include <windows.h>
+#include <vector>
 
 // #include <cryptopp/hex.h>    // successfully found
 // #include <openssl/aes.h>      // successfully found
@@ -13,6 +14,17 @@
 // #include <бибилотеки openssl>
 
 // написать функцию шифрования
+/*
+ * возвращает std::vector<Qstring> вектор путей к зашифрованным файлам
+ * на вход подаётся путь к папке\файлу для шифрования
+ *              если вход - папка, то шифруются все файлы внутри (в т.ч. вложенные)
+ *              если вход - файл, то шифруется только он
+ *
+ *              */
+
+std::vector<QString> EncryptFiles(){
+
+}
 // написать функицю дешифрования
 // написать функцию проверки шифрованности (не шифровать если зашифровано и наоборот)
 
