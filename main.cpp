@@ -4,6 +4,10 @@
 #include <QTextStream>
 #include <windows.h>
 
+// #include <cryptopp/hex.h>    // successfully found
+// #include <openssl/aes.h>      // successfully found
+
+
 // для шифрования
 // #include <библиотека cryptopp.h>
 // #include <бибилотеки openssl>
