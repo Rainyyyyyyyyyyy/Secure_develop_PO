@@ -7,6 +7,7 @@ CONFIG += c++17 cmdline
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+        FolderTraveler.cpp \
         CryptoLib.cpp \
         main.cpp
 
@@ -22,25 +23,14 @@ LIBS += -LE:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1/lib_C
 # Путь к заголовкам Crypto++ (установленным через MSYS2)
 #INCLUDEPATH += C:/msys64/mingw64/include/cryptopp
 
-INCLUDEPATH += E:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1/lib_Cryptopp_unpacked
-# INCLUDEPATH += "C:\msys64\ucrt64\include\cryptopp"
-#LIBS += -LC:/msys64/ucrt64/lib -lcryptopp
-LIBS += -LE:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1/lib_Cryptopp_unpacked/ -lcryptopp
+# Путь к заголовкам OpenSSL
+INCLUDEPATH += E:/Qt/Qt/Tools/mingw810_64/opt/include
+# Путь к заголовкам OpenSSL
+# INCLUDEPATH += C:/msys64/ucrt64/include
 
-
-# Путь к заголовочным файлам OpenSSL из vcpkg
-INCLUDEPATH += C:/TempTrash/vcpkg/installed/x64-windows/include
-# Путь к библиотекам OpenSSL
-LIBS += -LC:/TempTrash/vcpkg/installed/x64-windows/lib
-
-# Путь к библиотеке
-#LIBS += -LC:/msys64/mingw64/lib -lcryptopp
-
-# Для Windows нужны эти библиотеки
-win32 {
-    LIBS += -lws2_32 -luser32
-}
+# Путь к библиотекам
+#LIBS += -LC:/Qt/Tools/mingw810_64/opt/lib -lcrypto -lssl
+LIBS +=  -LE:/Qt/Qt/Tools/mingw810_64/opt/lib -lcrypto -lssl
 
 HEADERS += \
-    CryptoLib.h \
-    InterfaceCryptoLib.h
+    FolderTraveler.h
