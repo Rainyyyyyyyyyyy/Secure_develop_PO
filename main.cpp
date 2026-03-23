@@ -3,46 +3,70 @@
 #include <QDebug>
 #include <QTextStream>
 #include <windows.h>
-void listContents(const QString &path, int indent = 0) {
-    QDir dir(path);
 
-    // Проверяем, существует ли папка
-    if (!dir.exists()) {
-        qDebug() << "No Folder:" << path;
-        return;
-    }
+#include <QVector>
 
-    // Получаем список всех файлов и папок (включая скрытые)
-    QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
+class FolderTraveler{
+private:
+    // список путей ко всем файлам внутри папки Folder_Path
+    QVector <QString> File_Path_List;
+    QString Folder_Path;
 
-    // Отступ для визуального отображения вложенности
-    QString indentStr(indent * 2, ' ');
+    void listContents(const QString &path, int indent = 0) {
+        QDir dir(path);
 
-    for (const QFileInfo &entry : entries) {
-        if (entry.isDir()) {
-            // Выводим папку
-            qDebug().noquote() << indentStr + "[Folder]" + entry.fileName();
-            // Рекурсивно обходим содержимое папки
-            listContents(entry.absoluteFilePath(), indent + 1);
-        } else {
-            // Выводим файл с информацией о размере
-            QString sizeStr;
-            qint64 size = entry.size();
+        // Проверяем, существует ли папка
+        if (!dir.exists()) {
+            qDebug() << "No Folder:" << path;
+            return;
+            //return QVector <QString>();
+        }
 
-            if (size < 1024) {
-                sizeStr = QString::number(size) + " B";
-            } else if (size < 1024 * 1024) {
-                sizeStr = QString::number(size / 1024.0, 'f', 2) + " KB";
-            } else if (size < 1024 * 1024 * 1024) {
-                sizeStr = QString::number(size / (1024.0 * 1024.0), 'f', 2) + " MB";
+        // Получаем список всех файлов и папок (включая скрытые)
+        QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
+
+        // Отступ для визуального отображения вложенности
+        QString indentStr(indent * 2, ' ');
+
+        for (const QFileInfo &entry : entries) {
+            if (entry.isDir()) {
+                // Выводим папку
+                qDebug().noquote() << indentStr + "[Folder]" + entry.fileName();
+                // Рекурсивно обходим содержимое папки
+                listContents(entry.absoluteFilePath(), indent + 1);
             } else {
-                sizeStr = QString::number(size / (1024.0 * 1024.0 * 1024.0), 'f', 2) + " GB";
-            }
 
-            qDebug().noquote() << indentStr + "[File]" + entry.fileName() + " (" + sizeStr + ")";
+                // Выводим файл с информацией о размере
+                QString sizeStr;
+                qint64 size = entry.size();
+
+                if (size < 1024) {
+                    sizeStr = QString::number(size) + " B";
+                } else if (size < 1024 * 1024) {
+                    sizeStr = QString::number(size / 1024.0, 'f', 2) + " KB";
+                } else if (size < 1024 * 1024 * 1024) {
+                    sizeStr = QString::number(size / (1024.0 * 1024.0), 'f', 2) + " MB";
+                } else {
+                    sizeStr = QString::number(size / (1024.0 * 1024.0 * 1024.0), 'f', 2) + " GB";
+                }
+
+                qDebug().noquote() << indentStr + "[File]" + entry.fileName() + " (" + sizeStr + ")";
+            }
         }
     }
-}
+
+
+public:
+
+    void TravelFolder(){//const QString &path){
+        /*return File_Path_List = */listContents(Folder_Path);
+    }
+
+    //QVector <QString> TravelFolder(QString path){
+    FolderTraveler(QString &path){
+        Folder_Path = path;
+    }
+};
 
 int main(int argc, char *argv[]) {
     QCoreApplication app(argc, argv);
@@ -59,10 +83,12 @@ int main(int argc, char *argv[]) {
     folderPath = input.readLine().trimmed();
 
     output << "\nContent of  " << folderPath << ":\n";
-            output << "====================================\n";
+    output << "====================================\n";
     output.flush();
 
-    listContents(folderPath);
+    FolderTraveler popa(folderPath);
+    popa.TravelFolder();
+    //listContents(folderPath);
 
     return 0;
 }
