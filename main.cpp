@@ -6,6 +6,11 @@
 
 #include <QVector>
 
+// Присоединилась openssl!!!
+#include <openssl/crypto.h>
+
+
+
 class FolderTraveler{
 private:
     // список путей ко всем файлам внутри папки Folder_Path
