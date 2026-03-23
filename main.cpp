@@ -17,13 +17,13 @@ private:
     QVector <QString> File_Path_List;
     QString Folder_Path;
 
-    void listContents(const QString &path, int indent = 0) {
+    QVector <QString> listContents(const QString &path, int indent = 0) {
         QDir dir(path);
 
         // Проверяем, существует ли папка
         if (!dir.exists()) {
             qDebug() << "No Folder:" << path;
-            return;
+            return QVector <QString>();
             //return QVector <QString>();
         }
 
@@ -63,8 +63,8 @@ private:
 
 public:
 
-    void TravelFolder(){//const QString &path){
-        /*return File_Path_List = */listContents(Folder_Path);
+    QVector <QString> TravelFolder(){ //const QString &path){
+        return File_Path_List = listContents(Folder_Path);
     }
 
     //QVector <QString> TravelFolder(QString path){
@@ -79,6 +79,7 @@ int main(int argc, char *argv[]) {
     QString folderPath;
     QTextStream input(stdin);
     QTextStream output(stdout);
+    output<<OPENSSL_VERSION_TEXT;
     SetConsoleCP(65001);
     SetConsoleOutputCP(65001);
     output << "Enter path to folder: ";
@@ -93,6 +94,8 @@ int main(int argc, char *argv[]) {
 
     FolderTraveler popa(folderPath);
     popa.TravelFolder();
+
+
     //listContents(folderPath);
 
     return 0;
