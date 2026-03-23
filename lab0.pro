@@ -7,8 +7,8 @@ CONFIG += c++17 cmdline
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        FolderTraveler.cpp \
-        CryptoLib.cpp \
+        src/FolderTraveler.cpp \
+        src/CryptoLib.cpp \
         main.cpp
 
 # Default rules for deployment.
@@ -23,6 +23,10 @@ LIBS += -LE:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1/lib_C
 # Путь к заголовкам Crypto++ (установленным через MSYS2)
 #INCLUDEPATH += C:/msys64/mingw64/include/cryptopp
 
+
+
+
+
 # Путь к заголовкам OpenSSL
 INCLUDEPATH += E:/Qt/Qt/Tools/mingw810_64/opt/include
 # Путь к заголовкам OpenSSL
@@ -33,4 +37,6 @@ INCLUDEPATH += E:/Qt/Qt/Tools/mingw810_64/opt/include
 LIBS +=  -LE:/Qt/Qt/Tools/mingw810_64/opt/lib -lcrypto -lssl
 
 HEADERS += \
+    InterfaceCryptoLib.h \
+    CryptoLib.h \
     FolderTraveler.h

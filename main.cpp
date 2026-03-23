@@ -9,7 +9,7 @@
 
 // Присоединилась openssl!!!
 #include <openssl/crypto.h>
-
+#include <openssl/rand.h>
 
 #include "FolderTraveler.h"
 
@@ -19,6 +19,14 @@ QTextStream output(stdout);
 
 int main(int argc, char *argv[]) {
     QCoreApplication app(argc, argv);
+
+    unsigned char chara[4] = {0,0,0,0};
+    RAND_bytes(chara, 4);
+    for(int i=0; i<4; i++)output<<chara[i]<<' ';
+    output.flush();
+    input.readLine();
+    return 0;
+
 
     // вывод версии openssl
     output<<OPENSSL_VERSION_TEXT<<'\n';
