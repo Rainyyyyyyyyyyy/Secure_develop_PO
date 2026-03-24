@@ -15,14 +15,17 @@
 class CryptoActions: public InterfaceCryptoActions {
 
 private:
-    CryptoActions();
-    ~CryptoActions();
-
-
     // для вывода
     static QTextStream input;
     static QTextStream output;
+// =    =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =
 
+
+    // запрет на копирование
+    CryptoActions(const CryptoActions&) = delete;
+    CryptoActions() {}    // конструктор без реализации
+    ~CryptoActions() {}    // и деструктор
+    CryptoActions& operator=(CryptoActions const&); // и присваивание
 
 public:
 
@@ -32,16 +35,10 @@ public:
         return s;
     }
 
-    CryptoActions(const CryptoActions&) = delete;
 
-    bool EncryptFile(const QString &filePath, const QString &password) override;
-    /*{
-        output<<"ASD";
-    }*/
-    bool DecryptFile(const QString &filePath, const QString &password) override;
-    /*{
-        output<<"ASASDA";
-    }*/
+    bool Encrypt_File(const QString &filePath, const QString &password) override;
+    bool Decrypt_File(const QString &filePath, const QString &password) override;
+// =    =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =
 };
 
 // из ключа получить хэш (SHA-256)
