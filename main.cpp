@@ -33,21 +33,23 @@ int main(int argc, char *argv[]) {
 
     // вывод версии openssl
     output<<OPENSSL_VERSION_TEXT<<'\n';
+    output.flush();
 
     // для вывода кириллицы
-    SetConsoleCP(65001);
-    SetConsoleOutputCP(65001);
+    SetConsoleCP(12051);
+    SetConsoleOutputCP(12051);
 
 
-    output << "Enter path to folder: ";
-    output.flush();
+    //output << "Enter path to folder: ";
+    //output.flush();
     // примеры
     // H:\Documents\Secure_tools_AndreevaVV\TRUE_REPO
     // E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1\Qt\try3_gitclone
     // E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1\Qt\try3_gitclone\Libraries\cryptopp(defeat)
     // E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1\Qt\try7_gitclone\papki
 
-    QString folderPath;
+    // Проверка прохода папки
+    /*QString folderPath;
     folderPath = input.readLine().trimmed();
 
     output << "\nContent of  " << folderPath << ":\n";
@@ -57,14 +59,22 @@ int main(int argc, char *argv[]) {
     FolderTraveler Folderr(folderPath);
     Folderr.TravelFolder();
     Folderr.OutputList();
+*/
 
-
+    output<<"Enter path to file: ";
+    output.flush();
+    QString Path_to_encrypt_file = input.readLine();
+    output<<"Enter password to encrypt: ";
+    output.flush();
+    QString Password_to_encrypt = input.readLine();
     CryptoActions &cry = CryptoActions::Instance();
 
-    cry.Encrypt_File("abc", "abckey");
-    cry.Decrypt_File("abc", "abckey");
 
-    CryptoActions::Instance().Encrypt_File("abc","abckey");
+    // E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1\Qt\try7_gitclone\papki\asd.txt
+    cry.Encrypt_File(Path_to_encrypt_file, Password_to_encrypt);
+    cry.Decrypt_File(Path_to_encrypt_file + ".enc", Password_to_encrypt);
+
+    //CryptoActions::Instance().Encrypt_File("abc","abckey");
 
 
 

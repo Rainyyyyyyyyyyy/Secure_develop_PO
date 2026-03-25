@@ -8,8 +8,15 @@
 
 #include <QDebug>
 #include <QFile>
+#include <QFileInfo>
+#include <QDebug>
 #include <QByteArray>
-#include <QCryptographicHash>
+
+
+#include <openssl/evp.h>
+#include <openssl/rand.h>
+#include <openssl/err.h>
+//#include <QCryptographicHash>
 
 // class singleton для шифрования и дешифрования файлов
 class CryptoActions: public InterfaceCryptoActions {
