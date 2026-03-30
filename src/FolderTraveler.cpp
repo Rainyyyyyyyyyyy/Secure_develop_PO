@@ -76,6 +76,12 @@ void FolderTraveler::listContents(const QString &path, int indent) {
                 output.flush();
                 // Рекурсивно обходим содержимое папки
                 listContents(entry.absoluteFilePath(), indent + 1);
+            }else{
+                // Выводим ярлык на папку
+                output << indentStr + "[Folder.lnk]" + entry.fileName();
+                output<<'\n';
+                output.flush();
+                // и НЕ продолжаем рекурсию
             }
         } else {
             // добавление файла в список файлов
@@ -93,8 +99,9 @@ void FolderTraveler::listContents(const QString &path, int indent) {
             } else {
                 sizeStr = QString::number(size / (1024.0 * 1024.0 * 1024.0), 'f', 2) + " GB";
             }
-
+            if(entry.suffix().toLower() != "lnk")
             output << indentStr + "[File]" + entry.fileName() + " (" + sizeStr + ")";
+            else output << indentStr + "[File.lnk]" + entry.fileName() + " (" + sizeStr + ")";
             output<<'\n';
             output.flush();
         }
