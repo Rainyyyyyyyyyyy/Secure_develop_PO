@@ -18,8 +18,80 @@ QTextStream input(stdin);
 QTextStream output(stdout);
 
 
+
+#include "CryptoLibExceptions.h"
+/*
+ * ExceptionFileNotFound                    1001
+ * ExceptionUnableToOpenFile                    1002
+ * ExceptionUnableToCreateFile                  1003
+ * ExceptionUnableToWriteEncryptedTextToFile                    1004
+ * ExceptionOpensslHMAC                 2001
+ * ExceptionOpensslWriteSaltToFile                  2002
+ * ExceptionOpensslCipherCTXnew                 2003
+ * ExceptionOpensslEncryptInit                  2004
+ * ExceptionOpensslEncryptUpdate                    2005
+ * ExceptionOpensslEncryptFinal                 2006
+ */
 int main(int argc, char *argv[]) {
-    QCoreApplication app(argc, argv);
+    //QCoreApplication app(argc, argv);
+
+    /* Проверка работы класса Exceptions: public std::exception */
+    Exceptions *excp;
+    // 1001
+    excp  = new ExceptionFileNotFound;
+    qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
+    delete excp;
+    // 1002
+    excp  = new ExceptionUnableToOpenFile;
+    qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
+    delete excp;
+    // 1003
+    excp  = new ExceptionUnableToCreateFile;
+    qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
+    delete excp;
+    // 1004
+    excp  = new ExceptionUnableToWriteEncryptedTextToFile;
+    qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
+    delete excp;
+    // 2001
+    excp  = new ExceptionOpensslHMAC;
+    qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
+    delete excp;
+    // 2002
+    excp  = new ExceptionOpensslWriteSaltToFile;
+    qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
+    delete excp;
+    // 2003
+    excp  = new ExceptionOpensslCipherCTXnew;
+    qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
+    delete excp;
+    // 2004
+    excp  = new ExceptionOpensslEncryptInit;
+    qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
+    delete excp;
+    // 2005
+    excp  = new ExceptionOpensslEncryptUpdate;
+    qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
+    delete excp;
+    // 2006
+    excp  = new ExceptionOpensslEncryptFinal;
+    qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
+    delete excp;
+
+    /* Output:
+File not Found!   Code:  1001
+Unable to open file!   Code:  1002
+Unable to create file!   Code:  1003
+Unable to write encrypted text to file!   Code:  1004
+Error: PKCS5_PBKDF2_HMAC() completed with problem!   Code:  2001
+Unable to write salt to file!   Code:  2002
+Error: EVP_CIPHER_CTX_new() completed with problem!   Code:  2003
+Error: EVP_EncryptInit_ex() completed with problem!   Code:  2004
+Error: EVP_EncryptUpdate() completed with problem!   Code:  2005
+Error: EVP_EncryptFinal_ex() compelted with problem!   Code:  2006
+*/  // correct
+    return 0;
+
 
     /* // проверка работы openssl (например openssl/rand.h и необходимой для неё libeay32.dll
      * // ...\Qt\Tools\mingw810_64\opt\bin\libeay32.dll

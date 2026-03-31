@@ -115,7 +115,7 @@ public:
     ExceptionOpensslCipherCTXnew() : Exceptions(EXCEPTION_OPENSSL_EVP_CIPHER_CTX_new) {}
 
     const char *what() const noexcept override {
-        return "Error:  EVP_CIPHER_CTX_new() completed with problem!";
+        return "Error: EVP_CIPHER_CTX_new() completed with problem!";
     }
 };
 
