@@ -63,6 +63,7 @@ int main(int argc, char *argv[]) {
                 [File]file2.txt.yarl.lnk (0 B)
             [Folder]papka3
     */
+    /*
     QString folderPath;
     folderPath = input.readLine().trimmed();
 
@@ -75,6 +76,16 @@ int main(int argc, char *argv[]) {
     Folderr.OutputList();
 */
 
+
+
+    // tests: E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Files_tests\emptytext.txt
+    //          E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Files_tests\plaintext.txt
+    // password: "password"
+    /*
+     * зашифрованный файл - <имя_исходного_файла>.enc
+     * дешифрованный файл - <имя_исходного_файла>.dec
+     *
+     */
     output<<"Enter path to file: ";
     output.flush();
     QString Path_to_encrypt_file = input.readLine();
@@ -86,6 +97,7 @@ int main(int argc, char *argv[]) {
 
     // E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1\Qt\try7_gitclone\papki\asd.txt
     cry.Encrypt_File(Path_to_encrypt_file, Password_to_encrypt);
+    qDebug()<<"\n"<<Qt::flush;
     cry.Decrypt_File(Path_to_encrypt_file + ".enc", Password_to_encrypt);
 
     //CryptoActions::Instance().Encrypt_File("abc","abckey");
