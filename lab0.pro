@@ -37,6 +37,7 @@ INCLUDEPATH += E:/Qt/Qt/Tools/mingw810_64/opt/include
 LIBS +=  -LE:/Qt/Qt/Tools/mingw810_64/opt/lib -lcrypto -lssl
 
 HEADERS += \
+    CryptoLibExceptions.h \
     InterfaceCryptoLib.h \
     CryptoLib.h \
     FolderTraveler.h
