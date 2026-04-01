@@ -26,7 +26,7 @@
 #define EXCEPTION_OPENSSL_EVP_DecryptUpdate 2009 // ошибка в дешифровании блока (openssl)
 #define EXCEPTION_OPENSSL_EVP_DecryptFinal_ex 2010 // ошибка завершения дешифрования (последний блок) (openssl)
 
-#define EXCEPTION_INVALID_FILE_TO_DECRYPT 3001 // файл слишком мал, для наличия сигнатуры для дешифрования
+#define EXCEPTION_FILE_TOO_SMALL_TO_BE_DECRYPTED 3001 // файл слишком мал, для наличия сигнатуры для дешифрования
 
 
 // QString.toUtf8() -> QByteArray \
@@ -233,7 +233,7 @@ public:
 /* Исключение: файл может быть повреждён, файл слишком мал, для наличия сигнатуры (соли) для дешфирования */
 class ExceptionFileTooSmallToDecrypt : public Exceptions {
 public:
-    ExceptionFileTooSmallToDecrypt() : Exceptions(EXCEPTION_INVALID_FILE_TO_DECRYPT) {}
+    ExceptionFileTooSmallToDecrypt() : Exceptions(EXCEPTION_FILE_TOO_SMALL_TO_BE_DECRYPTED) {}
 
     const char *what() const noexcept override {
         return "File might be corrupted: too small to be encrypted!";
