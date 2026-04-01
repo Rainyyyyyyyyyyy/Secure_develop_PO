@@ -8,7 +8,7 @@
 #include <QVector>
 
 // Присоединилась openssl!!!
-#include <openssl/crypto.h>
+//#include <openssl/crypto.h>
 #include <openssl/rand.h>
 
 #include "FolderTraveler.h"
@@ -180,7 +180,7 @@ File might be corrupted: too small to be encrypted!   Code:  3001
                 [File]file2.txt.yarl.lnk (0 B)
             [Folder]papka3
     */
-    /*
+    // E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Folder_tests
     QString folderPath;
     folderPath = input.readLine().trimmed();
 
@@ -191,9 +191,23 @@ File might be corrupted: too small to be encrypted!   Code:  3001
     FolderTraveler Folderr(folderPath);
     Folderr.TravelFolder();
     Folderr.OutputList();
-*/
 
-
+    QVector <QString> Folder_entries_list = Folderr.Entries();
+    //return 0;
+    CryptoActions &cry = CryptoActions::Instance();
+    try {
+        QString Password_to_encrypt = "password";
+        for(int i=0; i<Folder_entries_list.size(); i++){
+            cry.Encrypt_File(Folder_entries_list[i], Password_to_encrypt);//(Path_to_encrypt_file, Password_to_encrypt);
+            qDebug()<<"\n"<<Qt::flush;
+            cry.Decrypt_File(Folder_entries_list[i]+".enc", Password_to_encrypt);//(Path_to_encrypt_file + ".enc", Password_to_encrypt);
+        }
+    }
+    catch(const Exceptions *excp){
+        qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
+        delete excp;
+    }
+    return 0;
 
     // tests: E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Files_tests\emptytext.txt
     //          E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Files_tests\plaintext.txt
@@ -209,7 +223,7 @@ File might be corrupted: too small to be encrypted!   Code:  3001
     output<<"Enter password to encrypt: ";
     output.flush();
     QString Password_to_encrypt = input.readLine();
-    CryptoActions &cry = CryptoActions::Instance();
+    //CryptoActions &cry = CryptoActions::Instance();
 
     // идеи для consoleUI:
     /*пароль начинается обязательно с буквы

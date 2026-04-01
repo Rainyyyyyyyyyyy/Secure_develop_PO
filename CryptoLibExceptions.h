@@ -5,7 +5,6 @@
 #endif // CRYPTOLIBEXCEPTIONS_H \
 //
 #include <exception>    // из std
-#include <QString>
 
 #define EXCEPTION_FILE_NOT_FOUND 1001
 #define EXCEPTION_UNABLE_TO_OPEN_FILE 1002
