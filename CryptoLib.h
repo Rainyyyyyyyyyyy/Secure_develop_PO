@@ -4,7 +4,7 @@
 #endif // CRYPTOLIB_H
 
 #include "InterfaceCryptoLib.h"
-
+#include "CryptoLibExceptions.h"
 
 #include <QDebug>
 #include <QFile>

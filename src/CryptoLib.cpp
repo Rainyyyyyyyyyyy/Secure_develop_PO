@@ -20,32 +20,40 @@ bool CryptoActions::Encrypt_File(const QString &filePath, const QString &passwor
     // 1. Проверяем, существует ли файл
     QFile inputFile(filePath);
     if (!inputFile.exists()) {
-        qCritical() << "File not found:" << filePath;
-            return false;
+        //qCritical() << "File not found:" << filePath;
+        Exceptions *Excp = new ExceptionFileNotFound;
+        throw Excp;
+        //    return false;
     }
 
     // 2. Открываем исходный файл для чтения
     if (!inputFile.open(QIODevice::ReadOnly)) {
-        qCritical() << "Unable to open file:" << filePath;
-        return false;
+        //qCritical() << "Unable to open file:" << filePath;
+        //return false;
+        Exceptions *Excp = new ExceptionUnableToOpenFile;
+        throw Excp;
     }
 
     // 3. Формируем имя для зашифрованного файла
     QString encryptedFilePath = filePath + ".enc";
     QFile outputFile(encryptedFilePath);
     if (!outputFile.open(QIODevice::WriteOnly)) {
-        qCritical() << "Unable to create file:" << encryptedFilePath;
+        //qCritical() << "Unable to create file:" << encryptedFilePath;
         inputFile.close();
-        return false;
+        Exceptions *Excp = new ExceptionUnableToCreateFile;
+        throw Excp;
+        //return false;
     }
 
     // 4. Генерируем случайную соль
     unsigned char salt[SALT_LEN];
     if (RAND_bytes(salt, sizeof(salt)) != 1) {
-        qCritical() << "Error from generation salt";
+        //qCritical() << "Error from generation salt";
         inputFile.close();
         outputFile.close();
-        return false;
+        Exceptions *Excp = new ExceptionOpensslRandbytes;
+        throw Excp;
+        //return false;
     }
 
     // 5. Преобразуем пароль в ключ и вектор инициализации (IV) с помощью PBKDF2
@@ -59,38 +67,46 @@ bool CryptoActions::Encrypt_File(const QString &filePath, const QString &passwor
                            ITERATIONS,
                            EVP_sha256(),
                            KEY_LEN + IV_LEN, key)) {
-        qCritical() << "Error from output key PBKDF2!";
+        //qCritical() << "Error from output key PBKDF2!";
         inputFile.close();
         outputFile.close();
-        return false;
+        Exceptions *Excp = new ExceptionOpensslHMAC;
+        throw Excp;
+        //return false;
     }
     // Разделяем полученные данные на ключ и IV
     memcpy(iv, key + KEY_LEN, IV_LEN);
 
     // 6. Сохраняем соль в начало выходного файла
     if (outputFile.write(reinterpret_cast<const char*>(salt), SALT_LEN) != SALT_LEN) {
-        qCritical() << "Unable to write salt in file!";
+        //qCritical() << "Unable to write salt in file!";
         inputFile.close();
         outputFile.close();
-        return false;
+        Exceptions *Excp = new ExceptionOpensslWriteSaltToFile;
+        throw Excp;
+        //return false;
     }
 
     // 7. Инициализируем контекст шифрования
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
     if (!ctx) {
-        qCritical() << "Error from creating context!";
+        //qCritical() << "Error from creating context!";
         inputFile.close();
         outputFile.close();
-        return false;
+        Exceptions *Excp = new ExceptionOpensslCipherCTXnew;
+        throw Excp;
+        //return false;
     }
 
     // Выбираем алгоритм AES-256-CBC
     if (1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr, key, iv)) {
-        qCritical() << "Error from initialization!";
+        //qCritical() << "Error from initialization!";
         EVP_CIPHER_CTX_free(ctx);
         inputFile.close();
         outputFile.close();
-        return false;
+        Exceptions *Excp = new ExceptionOpensslEncryptInit;
+        throw Excp;
+        //return false;
     }
 
     // 8. Читаем и шифруем данные блоками
@@ -108,37 +124,45 @@ bool CryptoActions::Encrypt_File(const QString &filePath, const QString &passwor
         if (1 != EVP_EncryptUpdate(ctx, outBuffer, &outLen,
                                    reinterpret_cast<unsigned char*>(inBuffer.data()),
                                    bytesRead)) {
-            qCritical() << "Error from encrypting block!";
+            //qCritical() << "Error from encrypting block!";
             EVP_CIPHER_CTX_free(ctx);
             inputFile.close();
             outputFile.close();
-            return false;
+            Exceptions *Excp = new ExceptionOpensslEncryptUpdate;
+            throw Excp;
+            //return false;
         }
         // Записываем зашифрованный блок
         if (outputFile.write(reinterpret_cast<const char*>(outBuffer), outLen) != outLen) {
-            qCritical() << "Error from writing ciphertext!";
+            //qCritical() << "Error from writing ciphertext!";
             EVP_CIPHER_CTX_free(ctx);
             inputFile.close();
             outputFile.close();
-            return false;
+            Exceptions *Excp = new ExceptionUnableToWriteEncryptedTextToFile;
+            throw Excp;
+            //return false;
         }
         bytesWritten += outLen;
     }
 
     // 9. Финализируем шифрование (дописываем последний блок с паддингом)
     if (1 != EVP_EncryptFinal_ex(ctx, outBuffer, &outLen)) {
-        qCritical() << "Error from completed encryption!";
+        //qCritical() << "Error from completed encryption!";
         EVP_CIPHER_CTX_free(ctx);
         inputFile.close();
         outputFile.close();
-        return false;
+        Exceptions *Excp = new ExceptionOpensslEncryptFinal;
+        throw Excp;
+        //return false;
     }
     if (outputFile.write(reinterpret_cast<const char*>(outBuffer), outLen) != outLen) {
-        qCritical() << "Error from writing final data!";
+        //qCritical() << "Error from writing final data!";
         EVP_CIPHER_CTX_free(ctx);
         inputFile.close();
         outputFile.close();
-        return false;
+        Exceptions *Excp = new ExceptionUnableToWriteFinalDataToFile;
+        throw Excp;
+        //return false;
     }
     bytesWritten += outLen;
 
@@ -166,29 +190,37 @@ bool CryptoActions::Decrypt_File(const QString &filePath, const QString &passwor
         // 1. Check if encrypted file exists
         QFile inputFile(filePath);
         if (!inputFile.exists()) {
-        qCritical() << "Error: Encrypted file not found:" << filePath;
-        return false;
+        Exceptions *Excp = new ExceptionFileNotFound;
+        throw Excp;
+        //qCritical() << "Error: Encrypted file not found:" << filePath;
+        //return false;
         }
 
         // 2. Open encrypted file for reading
         if (!inputFile.open(QIODevice::ReadOnly)) {
-        qCritical() << "Error: Cannot open encrypted file for reading:" << filePath;
+        //qCritical() << "Error: Cannot open encrypted file for reading:" << filePath;
+        Exceptions *Excp = new ExceptionUnableToOpenFile;
+        throw Excp;
         return false;
         }
 
         // 3. Validate file size (must contain at least salt)
         if (inputFile.size() < SALT_LEN) {
-        qCritical() << "Error: File too small to be a valid encrypted file";
+        //qCritical() << "Error: File too small to be a valid encrypted file";
         inputFile.close();
-        return false;
+        //return false; // EXCEPTION_INVALID_FILE_TO_DECRYPT
+        Exceptions *Excp = new ExceptionFileTooSmallToDecrypt;
+        throw Excp;
         }
 
         // 4. Read salt from the beginning of the file
         unsigned char salt[SALT_LEN];
         if (inputFile.read(reinterpret_cast<char*>(salt), SALT_LEN) != SALT_LEN) {
-        qCritical() << "Error: Failed to read salt from file";
+        //qCritical() << "Error: Failed to read salt from file";
         inputFile.close();
-        return false;
+        //return false; // UNABLE_TO_READ_FILE
+        Exceptions *Excp = new ExceptionUnableToReadSalt;
+        throw Excp;
         }
 
         // 5. Derive key and IV from password using the same salt
@@ -201,9 +233,11 @@ bool CryptoActions::Decrypt_File(const QString &filePath, const QString &passwor
                                ITERATIONS,
                                EVP_sha256(),
                                KEY_LEN + IV_LEN, key)) {
-        qCritical() << "Error: PBKDF2 key derivation failed";
+        //qCritical() << "Error: PBKDF2 key derivation failed";
         inputFile.close();
-        return false;
+        //return false; // EXCEPTION_OPENSSL_PKCS5_PBKDF2_HMAC
+        Exceptions *Excp = new ExceptionOpensslHMAC;
+        throw Excp;
         }
         memcpy(iv, key + KEY_LEN, IV_LEN);
 
@@ -218,26 +252,32 @@ bool CryptoActions::Decrypt_File(const QString &filePath, const QString &passwor
 
         QFile outputFile(outputFilePath);
         if (!outputFile.open(QIODevice::WriteOnly)) {
-        qCritical() << "Error: Cannot create decrypted file:" << outputFilePath;
+        //qCritical() << "Error: Cannot create decrypted file:" << outputFilePath;
         inputFile.close();
-        return false;
+        //return false;   // UNABLE_TO_CREATE_FILE
+        Exceptions *Excp = new ExceptionUnableToCreateFile;
+        throw Excp;
         }
 
         // 7. Initialize decryption context
         EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
         if (!ctx) {
-        qCritical() << "Error: Failed to create decryption context";
+        //qCritical() << "Error: Failed to create decryption context";
         inputFile.close();
         outputFile.close();
-        return false;
+        //return false;   // EXCEPTION_OPENSSL_EVP_CIPHER_CTX_new
+        Exceptions *Excp = new ExceptionOpensslCipherCTXnew;
+        throw Excp;
         }
 
         if (1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr, key, iv)) {
-        qCritical() << "Error: Failed to initialize decryption";
+        //qCritical() << "Error: Failed to initialize decryption";
         EVP_CIPHER_CTX_free(ctx);
         inputFile.close();
         outputFile.close();
-        return false;
+        //return false;   //EXCEPTION_OPENSSL_EVP_DecryptInit_ex
+        Exceptions *Excp = new ExceptionOpensslDecryptInit;
+        throw Excp;
         }
 
         // 8. Read and decrypt data in chunks
@@ -251,41 +291,49 @@ bool CryptoActions::Decrypt_File(const QString &filePath, const QString &passwor
 
         while ((bytesRead = inputFile.read(reinterpret_cast<char*>(inBuffer), BUFFER_SIZE)) > 0) {
         if (1 != EVP_DecryptUpdate(ctx, outBuffer, &outLen, inBuffer, bytesRead)) {
-            qCritical() << "Error: Decryption failed during update";
+            //qCritical() << "Error: Decryption failed during update";
             EVP_CIPHER_CTX_free(ctx);
             inputFile.close();
-            outputFile.close();
-            return false;
+            outputFile.close(); // EXCEPTION_OPENSSL_DecryptUpdate
+            Exceptions *Excp = new ExceptionOpensslDecryptUpdate;
+            throw Excp;
+            //return false;
         }
         if (outputFile.write(reinterpret_cast<const char*>(outBuffer), outLen) != outLen) {
-            qCritical() << "Error: Failed to write decrypted data";
+            //qCritical() << "Error: Failed to write decrypted data";
             EVP_CIPHER_CTX_free(ctx);
             inputFile.close();
-            outputFile.close();
-            return false;
+            outputFile.close(); // UNABLE_TO_WRITE_TO_FILE
+            //return false;
+            Exceptions *excp = new ExceptionUnableToWriteDecryptedTextToFile;
+            throw excp;
         }
         totalWritten += outLen;
         }
 
         // 9. Finalize decryption (removes padding)
         if (1 != EVP_DecryptFinal_ex(ctx, outBuffer, &outLen)) {
-        qCritical() << "Error: Decryption finalization failed";
-        qCritical() << "       Possible wrong password or corrupted file";
+        //qCritical() << "Error: Decryption finalization failed";
+        //qCritical() << "       Possible wrong password or corrupted file";
         EVP_CIPHER_CTX_free(ctx);
         inputFile.close();
         outputFile.close();
         outputFile.remove();  // Remove incomplete output file
-        return false;
+        //return false;   //
+        Exceptions *Excp = new ExceptionOpensslDecryptFinal;
+        throw Excp;
         }
 
         if (outLen > 0) {
         if (outputFile.write(reinterpret_cast<const char*>(outBuffer), outLen) != outLen) {
-            qCritical() << "Error: Failed to write final decrypted block";
+            //qCritical() << "Error: Failed to write final decrypted block";
             EVP_CIPHER_CTX_free(ctx);
             inputFile.close();
             outputFile.close();
             outputFile.remove();
-            return false;
+            //return false;
+            Exceptions *Excp = new ExceptionUnableToWriteFinalDataToFile;
+            throw Excp;
         }
         totalWritten += outLen;
         }
