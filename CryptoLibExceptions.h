@@ -4,8 +4,9 @@
 
 #endif // CRYPTOLIBEXCEPTIONS_H \
 //
-#include <exception>    // из std
-#include <QString>
+
+#include "IExceptions.h"
+
 
 #define EXCEPTION_FILE_NOT_FOUND 1001
 #define EXCEPTION_UNABLE_TO_OPEN_FILE 1002
@@ -32,24 +33,6 @@
 // QString.toUtf8() -> QByteArray \
     // QByteArray.constData -> cosnt char*
 
-
-class Exceptions : public std::exception{
-protected:
-    int errorCode;           // код ошибки\исключения
-
-public:
-    // what() будет переопределяться в каждом наследнике
-    virtual const char *what() const noexcept = 0;
-    // деструктор
-    virtual ~Exceptions() = default;
-    // конструктор по умолчанию
-    Exceptions() : errorCode(0) {}
-    // конструктор по значению
-    Exceptions(int code) : errorCode(code) {}
-
-    // getter кода ошибки/исключения
-    int getCode() const { return errorCode; }
-};
 
 
 
