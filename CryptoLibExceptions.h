@@ -4,8 +4,9 @@
 
 #endif // CRYPTOLIBEXCEPTIONS_H \
 //
-   // из std
+
 #include "IExceptions.h"
+
 
 #define EXCEPTION_FILE_NOT_FOUND 1001
 #define EXCEPTION_UNABLE_TO_OPEN_FILE 1002
@@ -31,7 +32,6 @@
 
 // QString.toUtf8() -> QByteArray \
     // QByteArray.constData -> cosnt char*
-
 
 
 
