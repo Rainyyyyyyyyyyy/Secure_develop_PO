@@ -28,6 +28,8 @@
 #define EXCEPTION_OPENSSL_EVP_DecryptFinal_ex 2010 // ошибка завершения дешифрования (последний блок) (openssl)
 
 #define EXCEPTION_FILE_TOO_SMALL_TO_BE_DECRYPTED 3001 // файл слишком мал, для наличия сигнатуры для дешифрования
+#define EXCEPTION_FILE_IS_ALREADY_ENCRYPTED 3002    // файл уже зашифрован
+#define EXCEPTION_FILE_IS_ALREADY_DECRYPTED 3003    // файл уже дешифрован
 
 
 // QString.toUtf8() -> QByteArray \
@@ -222,5 +224,30 @@ public:
         return "File might be corrupted: too small to be encrypted!";
     }
 };
+
+
+
+
+
+/* Исключение: файл уже зашифрован */
+class ExceptionFileIsAlreadyEncrypted : public Exceptions {
+public:
+    ExceptionFileIsAlreadyEncrypted() : Exceptions(EXCEPTION_FILE_IS_ALREADY_ENCRYPTED) {}
+
+    const char *what() const noexcept override {
+        return "File is already encrypted!";
+    }
+};
+
+/* Исключение: файл уже дешифрован */
+class ExceptionFileIsAlreadyDecrypted : public Exceptions {
+public:
+    ExceptionFileIsAlreadyDecrypted() : Exceptions(EXCEPTION_FILE_IS_ALREADY_DECRYPTED) {}
+
+    const char *what() const noexcept override {
+        return "File is already decrypted!";
+    }
+};
+
 
 
