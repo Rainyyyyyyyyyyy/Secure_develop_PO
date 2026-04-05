@@ -10,13 +10,49 @@ const int KEY_LEN = 32;      // 256 бит для AES-256
 const int IV_LEN = 16;       // 16 байт для AES
 const int SALT_LEN = 16;     // 16 байт соли
 const int ITERATIONS = 10000; // 10000 итераций PBKDF2
+const int SIGN_LEN = 16;    // 16 байт для сигнатуры
+const QByteArray Signature_Sequence = "A66B06F945C9B57E";
+
+bool CryptoActions::IsFileEncrypted(const QString &filePath)
+{
+    QFile file(filePath);
+    if (!file.exists() || !file.open(QIODevice::ReadOnly)) {
+        throw new ExceptionUnableToOpenFile;
+        //return false;
+    }
+
+    // Проверяем, достаточно ли размера для сигнатуры
+    if (file.size() < SIGN_LEN) {
+        file.close();
+        throw new ExceptionFileTooSmall;
+        //return false;
+    }
+
+    // Читаем сигнатуру
+    char magic[SIGN_LEN];
+    if (file.read(magic, SIGN_LEN) != SIGN_LEN) {
+        file.close();
+        throw new ExceptionUnableToReadSign;
+        //return false;
+    }
+
+    file.close();
+
+    // Сравниваем с нашей сигнатурой
+    return memcmp(magic, Signature_Sequence, SIGN_LEN) == 0;
+}
 
 
 bool CryptoActions::Encrypt_File(const QString &filePath, const QString &password) {
     // 1. Проверяем, существует ли файл
+
     QFile inputFile(filePath);
-    if (!inputFile.exists()) {
-        throw new ExceptionFileNotFound;
+    //if (!inputFile.exists()) {
+    //    throw new ExceptionFileNotFound;
+    //}
+    // проверка на наличие сигнатуры
+    if(IsFileEncrypted(filePath)){
+        throw new ExceptionFileIsAlreadyEncrypted;
     }
 
     // 2. Открываем файл для чтения
@@ -98,8 +134,9 @@ bool CryptoActions::Encrypt_File(const QString &filePath, const QString &passwor
 
     EVP_CIPHER_CTX_free(ctx);
 
-    // 8. Формируем итоговый файл: [SALT][CIPHERTEXT]
+    // 8. Формируем итоговый файл: [SIGN][SALT][CIPHERTEXT]
     QByteArray finalData;
+    finalData.append(reinterpret_cast<const char*>(Signature_Sequence.data()), SIGN_LEN);
     finalData.append(reinterpret_cast<const char*>(salt), SALT_LEN);
     finalData.append(cipherData);
 
@@ -296,19 +333,24 @@ bool CryptoActions::Decrypt_File(const QString &filePath, const QString &passwor
     }
 
     // 2. Проверяем минимальный размер
-    if (file.size() < SALT_LEN) {
+    if (file.size() < (SALT_LEN + SIGN_LEN)) {
         file.close();
-        throw new ExceptionFileTooSmallToDecrypt;
+        throw new ExceptionFileTooSmall;
+    }
+
+    if(!IsFileEncrypted(filePath)){
+        throw new ExceptionFileIsAlreadyDecrypted;
     }
 
     // 3. Читаем файл
     QByteArray encryptedData = file.readAll();
     file.close();
+    // 4.0 Извлекаем сигнатуру
 
     // 4. Извлекаем соль и шифротекст
     unsigned char salt[SALT_LEN];
-    memcpy(salt, encryptedData.constData(), SALT_LEN);
-    QByteArray cipherData = encryptedData.mid(SALT_LEN);
+    memcpy(salt, encryptedData.constData() + SIGN_LEN, SALT_LEN);
+    QByteArray cipherData = encryptedData.mid(SALT_LEN + SIGN_LEN);
 
     // 5. Получаем ключ и IV
     unsigned char key[KEY_LEN];

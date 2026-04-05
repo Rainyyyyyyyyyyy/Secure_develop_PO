@@ -24,6 +24,11 @@ private:
     // для вывода
     static QTextStream input;
     static QTextStream output;
+
+
+
+
+
 // =    =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =
 
 
@@ -44,8 +49,18 @@ public:
 
     bool Encrypt_File(const QString &filePath, const QString &password) override;
     bool Decrypt_File(const QString &filePath, const QString &password) override;
+
+    bool IsFileEncrypted(const QString &filePath);
+
+
 // =    =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =
 };
 
 // из ключа получить хэш (SHA-256)
-QByteArray MakeKeyFromPassword(const QString &password);
+//QByteArray MakeKeyFromPassword(const QString &password);
+
+// сигнатура для определения "зашифрован \ не зашифрован"
+// если этой сигнатуры нет, то предполагается - "не зашифрован"
+// иначе - "зашифрован"
+
+

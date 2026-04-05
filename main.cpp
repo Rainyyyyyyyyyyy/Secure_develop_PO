@@ -219,8 +219,8 @@ File might be corrupted: too small to be encrypted!   Code:  3001
         current_UI_action = input.readLine();
     }while(current_UI_action == ".reset");
 
-    qDebug()<<"Ended program."<<Qt::endl;
-    return 0;
+    //qDebug()<<"Ended program."<<Qt::endl;
+    //return 0;
 
     QVector <QString> Folder_entries_list = Folderr.Entries();
     //return 0;
@@ -234,9 +234,9 @@ File might be corrupted: too small to be encrypted!   Code:  3001
             qDebug()<<Folder_entries_list[i]<<Qt::endl;
             try
             {
-                //cry.Encrypt_File(Folder_entries_list[i], Password_to_encrypt);//(Path_to_encrypt_file, Password_to_encrypt);
+                cry.Encrypt_File(Folder_entries_list[i], Password_to_encrypt);//(Path_to_encrypt_file, Password_to_encrypt);
                 //qDebug()<<"\n"<<Qt::flush;
-                cry.Decrypt_File(Folder_entries_list[i], Password_to_encrypt);//(Path_to_encrypt_file + ".enc", Password_to_encrypt);
+                //cry.Decrypt_File(Folder_entries_list[i], Password_to_encrypt);//(Path_to_encrypt_file + ".enc", Password_to_encrypt);
             }
             catch(const Exceptions * excp){
                 qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
