@@ -204,6 +204,11 @@ File might be corrupted: too small to be encrypted!   Code:  3001
                 folderPath = "";
                 throw new ExceptionFolderFromDiskC; //continue;
             }
+            if(folderPath == ""){
+                //qDebug()<<"NO";
+                //return 0;
+                throw new ExceptionFolderNotFould;
+            }
         }
         catch (const Exceptions *excp){
             qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
@@ -241,28 +246,51 @@ File might be corrupted: too small to be encrypted!   Code:  3001
     QString MODES[] = {".encrypt", ".decrypt" };
     //QString action;
     //QString UI_ACTIONS[] = {".exit", ".reset", ".mode", ".password" };
-    QString Password_to_encrypt = "password";
+    QString Password;// = "password";
+
+    // запрос режима
     do{
         qDebug()<<"Enter mode ('.encrypt', '.decrypt'): ";
         mode = input.readLine();
 
     }while(checkMODE(MODES, 2, mode) == false);
-    for(int i=0; i<Folder_entries_list.size(); i++){
-        qDebug()<<Folder_entries_list[i]<<Qt::endl;
-        try
-        {
-            if(mode == ".encrypt"){
-                cry.Encrypt_File(Folder_entries_list[i], Password_to_encrypt);//(Path_to_encrypt_file, Password_to_encrypt);
 
-                }else
-                if(mode == ".decrypt"){//qDebug()<<"\n"<<Qt::flush;
-                    cry.Decrypt_File(Folder_entries_list[i], Password_to_encrypt);//(Path_to_encrypt_file + ".enc", Password_to_encrypt);
-                }
+    // запрос пароля
+    current_UI_action = ".reset";
+    do{
+        qDebug()<<"Enter password: ";
+        Password = input.readLine();
+
+        qDebug()<<"Password: "<<Password<<Qt::endl;
+        qDebug()<<"Enter action('.reset' or skip): ";
+        current_UI_action = input.readLine();
+    }while(current_UI_action == ".reset");
+
+
+    if(mode == ".encrypt"){
+        for(int i=0; i<Folder_entries_list.size(); i++){
+            qDebug()<<Folder_entries_list[i]<<Qt::endl;
+            try
+            {
+                cry.Encrypt_File(Folder_entries_list[i], Password);//(Path_to_encrypt_file, Password_to_encrypt);
+            } catch(const Exceptions * excp){
+                    qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
+                    delete excp;
+            }
+                //break;
         }
-        catch(const Exceptions * excp){
-            qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
-            delete excp;
+    }else if(mode == ".decrypt"){
+        for(int i=0; i<Folder_entries_list.size(); i++){
+            qDebug()<<Folder_entries_list[i]<<Qt::endl;
+            try
+            {
+                cry.Decrypt_File(Folder_entries_list[i], Password);//(Path_to_encrypt_file, Password_to_encrypt);
+            } catch(const Exceptions * excp){
+                qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
+                delete excp;
+            }
         }
+        //break;
     }
 
 
