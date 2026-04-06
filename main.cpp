@@ -19,7 +19,19 @@ QTextStream output(stdout);
 
 
 
+bool checkMODE(const QString *modes, int size, const QString &s){
+    for(int i=0; i<size; i++){
+        if(s == modes[i])return true;
+    }
+    return false;
+}
 
+bool checkACTiON(const QString *actions, int size, const QString &s){
+    for(int i=0; i<size; i++){
+        if(s == actions[i])return true;
+    }
+    return false;
+}
 int main(int argc, char *argv[]) {
     //QCoreApplication app(argc, argv);
 
@@ -192,6 +204,11 @@ File might be corrupted: too small to be encrypted!   Code:  3001
                 folderPath = "";
                 throw new ExceptionFolderFromDiskC; //continue;
             }
+            if(folderPath == ""){
+                //qDebug()<<"NO";
+                //return 0;
+                throw new ExceptionFolderNotFould;
+            }
         }
         catch (const Exceptions *excp){
             qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
@@ -215,7 +232,7 @@ File might be corrupted: too small to be encrypted!   Code:  3001
 
         Folderr.OutputList();
 
-        qDebug()<<"Enter action ('.reset', '.exit', '.mode')"<<Qt::endl;
+        qDebug()<<"Enter action ('.reset', or skip)"<<Qt::endl;
         current_UI_action = input.readLine();
     }while(current_UI_action == ".reset");
 
@@ -226,29 +243,62 @@ File might be corrupted: too small to be encrypted!   Code:  3001
     //return 0;
     CryptoActions &cry = CryptoActions::Instance();
     QString mode;
-    QString MODES[2] = {".encrypt", ".decrypt" };
-    QString UI_ACTIONS[3] = {".exit", ".reset", ".mode" };
-        QString Password_to_encrypt = "password";
+    QString MODES[] = {".encrypt", ".decrypt" };
+    //QString action;
+    //QString UI_ACTIONS[] = {".exit", ".reset", ".mode", ".password" };
+    QString Password;// = "password";
 
+    // запрос режима
+    do{
+        qDebug()<<"Enter mode ('.encrypt', '.decrypt'): ";
+        mode = input.readLine();
+
+    }while(checkMODE(MODES, 2, mode) == false);
+
+    // запрос пароля
+    current_UI_action = ".reset";
+    do{
+        qDebug()<<"Enter password: ";
+        Password = input.readLine();
+
+        qDebug()<<"Password: "<<Password<<Qt::endl;
+        qDebug()<<"Enter action('.reset' or skip): ";
+        current_UI_action = input.readLine();
+    }while(current_UI_action == ".reset");
+
+
+    if(mode == ".encrypt"){
         for(int i=0; i<Folder_entries_list.size(); i++){
             qDebug()<<Folder_entries_list[i]<<Qt::endl;
             try
             {
-                cry.Encrypt_File(Folder_entries_list[i], Password_to_encrypt);//(Path_to_encrypt_file, Password_to_encrypt);
-                //qDebug()<<"\n"<<Qt::flush;
-                //cry.Decrypt_File(Folder_entries_list[i], Password_to_encrypt);//(Path_to_encrypt_file + ".enc", Password_to_encrypt);
+                cry.Encrypt_File(Folder_entries_list[i], Password);//(Path_to_encrypt_file, Password_to_encrypt);
+            } catch(const Exceptions * excp){
+                    qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
+                    delete excp;
             }
-            catch(const Exceptions * excp){
+                //break;
+        }
+    }else if(mode == ".decrypt"){
+        for(int i=0; i<Folder_entries_list.size(); i++){
+            qDebug()<<Folder_entries_list[i]<<Qt::endl;
+            try
+            {
+                cry.Decrypt_File(Folder_entries_list[i], Password);//(Path_to_encrypt_file, Password_to_encrypt);
+            } catch(const Exceptions * excp){
                 qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
                 delete excp;
             }
-       }
+        }
+        //break;
+    }
 
 
     return 0;
 
     // tests: E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Files_tests\emptytext.txt
     //          E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Files_tests\plaintext.txt
+    //          E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Folder_tests\test1
     // password: "password"
     /*
      * зашифрованный файл - <имя_исходного_файла>.enc

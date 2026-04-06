@@ -21,9 +21,8 @@
 class CryptoActions: public InterfaceCryptoActions {
 
 private:
-    // для вывода
-    static QTextStream input;
-    static QTextStream output;
+
+
 
 
 
