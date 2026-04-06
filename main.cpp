@@ -8,7 +8,7 @@
 #include <QVector>
 
 // Присоединилась openssl!!!
-#include <openssl/crypto.h>
+//#include <openssl/crypto.h>
 #include <openssl/rand.h>
 
 #include "FolderTraveler.h"
@@ -19,19 +19,19 @@ QTextStream output(stdout);
 
 
 
-//include "CryptoLibExceptions.h"
-/*
- * ExceptionFileNotFound                    1001
- * ExceptionUnableToOpenFile                    1002
- * ExceptionUnableToCreateFile                  1003
- * ExceptionUnableToWriteEncryptedTextToFile                    1004
- * ExceptionOpensslHMAC                 2001
- * ExceptionOpensslWriteSaltToFile                  2002
- * ExceptionOpensslCipherCTXnew                 2003
- * ExceptionOpensslEncryptInit                  2004
- * ExceptionOpensslEncryptUpdate                    2005
- * ExceptionOpensslEncryptFinal                 2006
- */
+bool checkMODE(const QString *modes, int size, const QString &s){
+    for(int i=0; i<size; i++){
+        if(s == modes[i])return true;
+    }
+    return false;
+}
+
+bool checkACTiON(const QString *actions, int size, const QString &s){
+    for(int i=0; i<size; i++){
+        if(s == actions[i])return true;
+    }
+    return false;
+}
 int main(int argc, char *argv[]) {
     //QCoreApplication app(argc, argv);
 
@@ -165,8 +165,17 @@ File might be corrupted: too small to be encrypted!   Code:  3001
     // E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1\Qt\try3_gitclone\Libraries\cryptopp(defeat)
     // E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1\Qt\try7_gitclone\papki
 
-
-    // QString folderPath = "E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files"
+    /* Проверка FolderTraveler */
+    /*
+    QString folderPathtest = "E:\\Z_vsyakoe_dla_echeby\\4k2sem\\SEcure_Develop_PO(Andreeva)\\laba1_test_files";
+    FolderTraveler TestFolder_NoLnk(folderPathtest);
+    TestFolder_NoLnk.TravelFolder();
+    QVector <QString> testNoLnk = TestFolder_NoLnk.Entries();
+    for(int i=0; i<testNoLnk.size(); i++){
+        qDebug()<<testNoLnk[i];
+    }
+    return 0;
+*/
     // output:
     /*
     [Folder]FolderTraveler_tests
@@ -180,36 +189,104 @@ File might be corrupted: too small to be encrypted!   Code:  3001
                 [File]file2.txt.yarl.lnk (0 B)
             [Folder]papka3
     */
-    /*
+    // E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Folder_tests
+
     QString folderPath;
-    folderPath = input.readLine().trimmed();
+    FolderTraveler Folderr;
+    QString current_UI_action = ".reset";
+    do{
+        Folderr.clear();
+        try {
+            qDebug()<<"Enter path to directory: "<<Qt::flush;
+            folderPath = input.readLine();
+            if(folderPath[0] == 'C' || folderPath[0] == 'c'){
+                //qDebug()<<"No disk C!";
+                folderPath = "";
+                throw new ExceptionFolderFromDiskC; //continue;
+            }
+        }
+        catch (const Exceptions *excp){
+            qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
+            delete excp;
+            continue;
+        }
+        try{
+            Folderr.SetPath(folderPath);
+            output << "\nContent of  " << folderPath << ":\n";
+            output << "====================================\n";
+            output.flush();
+            Folderr.TravelFolder();
+        }
+        catch (const Exceptions *excp){
+            qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
+            delete excp;
 
-    output << "\nContent of  " << folderPath << ":\n";
-    output << "====================================\n";
-    output.flush();
+            Folderr.clear();
+            continue;
+        }
 
-    FolderTraveler Folderr(folderPath);
-    Folderr.TravelFolder();
-    Folderr.OutputList();
-*/
+        Folderr.OutputList();
+
+        qDebug()<<"Enter action ('.reset', or skip)"<<Qt::endl;
+        current_UI_action = input.readLine();
+    }while(current_UI_action == ".reset");
+
+    //qDebug()<<"Ended program."<<Qt::endl;
+    //return 0;
+
+    QVector <QString> Folder_entries_list = Folderr.Entries();
+    //return 0;
+    CryptoActions &cry = CryptoActions::Instance();
+    QString mode;
+    QString MODES[] = {".encrypt", ".decrypt" };
+    //QString action;
+    //QString UI_ACTIONS[] = {".exit", ".reset", ".mode", ".password" };
+    QString Password_to_encrypt = "password";
+    do{
+        qDebug()<<"Enter mode ('.encrypt', '.decrypt'): ";
+        mode = input.readLine();
+
+    }while(checkMODE(MODES, 2, mode) == false);
+    for(int i=0; i<Folder_entries_list.size(); i++){
+        qDebug()<<Folder_entries_list[i]<<Qt::endl;
+        try
+        {
+            if(mode == ".encrypt"){
+                cry.Encrypt_File(Folder_entries_list[i], Password_to_encrypt);//(Path_to_encrypt_file, Password_to_encrypt);
+
+                }else
+                if(mode == ".decrypt"){//qDebug()<<"\n"<<Qt::flush;
+                    cry.Decrypt_File(Folder_entries_list[i], Password_to_encrypt);//(Path_to_encrypt_file + ".enc", Password_to_encrypt);
+                }
+        }
+        catch(const Exceptions * excp){
+            qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
+            delete excp;
+        }
+    }
 
 
+    return 0;
 
     // tests: E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Files_tests\emptytext.txt
     //          E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Files_tests\plaintext.txt
+    //          E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Folder_tests\test1
     // password: "password"
     /*
      * зашифрованный файл - <имя_исходного_файла>.enc
      * дешифрованный файл - <имя_исходного_файла>.dec
      *
      */
+
+    /*
     output<<"Enter path to file: ";
     output.flush();
     QString Path_to_encrypt_file = input.readLine();
     output<<"Enter password to encrypt: ";
     output.flush();
-    QString Password_to_encrypt = input.readLine();
-    CryptoActions &cry = CryptoActions::Instance();
+    //QString Password_to_encrypt = input.readLine();
+*/
+    //CryptoActions &cry = CryptoActions::Instance();
 
     // идеи для consoleUI:
     /*пароль начинается обязательно с буквы
@@ -227,7 +304,7 @@ File might be corrupted: too small to be encrypted!   Code:  3001
      *  и после завершения возвращают на первую стадию (например выбор режима)
      *  (либо оставляют на этой же стадии)
      */
-
+/*
     try{
     // E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1\Qt\try7_gitclone\papki\asd.txt
         cry.Encrypt_File(Path_to_encrypt_file, Password_to_encrypt);
@@ -238,7 +315,7 @@ File might be corrupted: too small to be encrypted!   Code:  3001
         qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
         delete excp;
     }
-
+*/
     //CryptoActions::Instance().Encrypt_File("abc","abckey");
 
 

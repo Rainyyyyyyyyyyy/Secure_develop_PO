@@ -38,6 +38,8 @@ LIBS +=  -LE:/Qt/Qt/Tools/mingw810_64/opt/lib -lcrypto -lssl
 
 HEADERS += \
     CryptoLibExceptions.h \
+    FolderTravelerExceptions.h \
+    IExceptions.h \
     InterfaceCryptoLib.h \
     CryptoLib.h \
     FolderTraveler.h

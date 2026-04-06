@@ -6,7 +6,7 @@
 #include <QTextStream>
 #include <QDir>
 
-
+#include "FolderTravelerExceptions.h"
 
 
 
@@ -33,12 +33,15 @@ public:
     // конструктор по QString
     FolderTraveler(QString &path);
 
+    // конструктор по умолчанию
+    FolderTraveler() {}
+
     // вывод списка путей к файлам в обозреваемой папке
-    void OutputList();
+    void OutputList() const;
 
 
     // вывод пути к обозреваемой папке
-    void OutputPath();
+    void OutputPath() const;
 
     // getter пути к папке
     const QString Path() const;
@@ -46,6 +49,13 @@ public:
 
     // getter внутренних файлов
     const QVector <QString> Entries() const;
+
+
+    // setter нового пути к папке
+    void SetPath(const QString &s);
+
+    // очистить список
+    void clear();
 };
 
 

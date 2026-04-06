@@ -16,7 +16,7 @@ FolderTraveler::FolderTraveler(QString &path){
 
 
 // вывод списка путей к файлам в обозреваемой папке
-void FolderTraveler::OutputList(){
+void FolderTraveler::OutputList() const{
     for(int i=0; i<File_Path_List.size(); i++){
         output<<File_Path_List[i]<<'\n';
     }
@@ -37,13 +37,18 @@ const QVector <QString> FolderTraveler::Entries() const {
 
 
 // вывод пути к обозреваемой папке
-void FolderTraveler::OutputPath(){
+void FolderTraveler::OutputPath() const{
     output<<Folder_Path;
     output.flush();
 }
 
 
 
+// очистить список
+void FolderTraveler::clear(){
+    Folder_Path = "";
+    File_Path_List.clear();
+}
 
 
 void FolderTraveler::listContents(const QString &path, int indent) {
@@ -51,10 +56,11 @@ void FolderTraveler::listContents(const QString &path, int indent) {
 
     // Проверяем, существует ли папка
     if (!dir.exists()) {
-        output << "No Folder:" << path;
-        output<<'\n';
-        output.flush();
-        return;
+        //output << "No Folder:" << path;
+        //output<<'\n';
+        //output.flush();
+        //return;
+        throw new ExceptionFolderNotFould;
     }
 
     // Получаем список всех файлов и папок (включая скрытые)
@@ -85,7 +91,9 @@ void FolderTraveler::listContents(const QString &path, int indent) {
             }
         } else {
             // добавление файла в список файлов
-            File_Path_List.push_back(entry.absoluteFilePath());
+            if(entry.suffix().toLower() != "lnk"){
+                File_Path_List.push_back(entry.absoluteFilePath());
+            }
             // Выводим файл с информацией о размере
             QString sizeStr;    // для вывода
             qint64 size = entry.size();
@@ -106,4 +114,79 @@ void FolderTraveler::listContents(const QString &path, int indent) {
             output.flush();
         }
     }
+}
+
+
+
+/*
+QString folderPathtest = "E:\\Z_vsyakoe_dla_echeby\\4k2sem\\SEcure_Develop_PO(Andreeva)\\laba1_test_files";
+FolderTraveler TestFolder_NoLnk(folderPathtest);
+TestFolder_NoLnk.TravelFolder();
+QVector <QString> testNoLnk = TestFolder_NoLnk.Entries();
+for(int i=0; i<testNoLnk.size(); i++){
+    qDebug()<<testNoLnk[i];
+}
+return 0;
+*/
+/* Вывод:
+[Folder]Encrypt_Files_tests
+  [File]emptytext.txt (0 B)
+  [File]plaintext.txt (129 B)
+[Folder]Encrypt_Folder_tests
+  [Folder]test1
+    [Folder]papka1
+      [File]file1.txt (45 B)
+      [File]file2.txt (51 B)
+    [Folder]papka2
+      [File]file3.txt (61 B)
+      [Folder.lnk]papka1-yarl.lnk
+    [Folder]papka3
+      [File]file4.txt (42 B)
+      [File]file5.txt (60 B)
+      [Folder]papka4
+        [File]fiel7.txt (0 B)
+        [Folder]papka6
+          [File]file9.txt (0 B)
+          [Folder]papka7
+            [File]file10.txt (0 B)
+      [Folder]papka5
+        [File]file8.txt (0 B)
+[Folder]FolderTraveler_tests
+  [Folder]papka1
+    [File]file1.txt (0 B)
+    [File]file2.txt (0 B)
+    [File]file3.txt (0 B)
+    [Folder]papka4
+      [File]file1.txt (17 B)
+  [Folder]papka2
+    [File.lnk]file2.txt.yarl.lnk (0 B)
+    [Folder.lnk]papka4.lnk
+  [Folder]papka3
+*/
+/* содержимое QVector <QString> File_Path_List :
+"E:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1_test_files/Encrypt_Files_tests/emptytext.txt"
+"E:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1_test_files/Encrypt_Files_tests/plaintext.txt"
+"E:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1_test_files/Encrypt_Folder_tests/test1/papka1/file1.txt"
+"E:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1_test_files/Encrypt_Folder_tests/test1/papka1/file2.txt"
+"E:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1_test_files/Encrypt_Folder_tests/test1/papka2/file3.txt"
+"E:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1_test_files/Encrypt_Folder_tests/test1/papka3/file4.txt"
+"E:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1_test_files/Encrypt_Folder_tests/test1/papka3/file5.txt"
+"E:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1_test_files/Encrypt_Folder_tests/test1/papka3/papka4/fiel7.txt"
+"E:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1_test_files/Encrypt_Folder_tests/test1/papka3/papka4/papka6/file9.txt"
+"E:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1_test_files/Encrypt_Folder_tests/test1/papka3/papka4/papka6/papka7/file10.txt"
+"E:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1_test_files/Encrypt_Folder_tests/test1/papka3/papka5/file8.txt"
+"E:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1_test_files/FolderTraveler_tests/papka1/file1.txt"
+"E:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1_test_files/FolderTraveler_tests/papka1/file2.txt"
+"E:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1_test_files/FolderTraveler_tests/papka1/file3.txt"
+"E:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1_test_files/FolderTraveler_tests/papka1/papka4/file1.txt"
+
+* Вывоится всё содержимое (в том числе ярлыки, но рекурсия не углубляется по адресам ярлыков)
+* Список заполняется в соответствии с выводом, КРОМЕ ярлыков (все ярлыки игнорируются)
+*/
+
+
+
+// setter нового пути к папке
+void FolderTraveler::SetPath(const QString &s){
+    Folder_Path = s;    // копирование
 }
