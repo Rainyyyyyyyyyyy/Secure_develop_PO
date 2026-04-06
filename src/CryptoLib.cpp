@@ -1,7 +1,7 @@
 #include "CryptoLib.h"
 
-QTextStream CryptoActions::input = QTextStream(stdin);
-QTextStream CryptoActions::output = QTextStream(stdout);
+
+
 
 
 
