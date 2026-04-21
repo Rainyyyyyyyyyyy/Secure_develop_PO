@@ -22,6 +22,7 @@ namespace {
                                EVP_sha256(),
                                DERIVED_LEN,
                                reinterpret_cast<unsigned char*>(derived.data()))) {
+
             return QByteArray();
         }
 
@@ -37,14 +38,14 @@ bool CryptoActions::IsFileEncrypted(const QString &filePath)
 {
     QFile file(filePath);
     if (!file.exists() || !file.open(QIODevice::ReadOnly)) {
-        throw new ExceptionUnableToOpenFile;
+            throw ExceptionUnableToOpenFile();
         //return false;
     }
 
     // Проверяем, достаточно ли размера для сигнатуры
     if (file.size() < SIGN_LEN) {
         file.close();
-        throw new ExceptionFileTooSmall;
+            throw ExceptionFileTooSmall();
         //return false;
     }
 
@@ -52,7 +53,7 @@ bool CryptoActions::IsFileEncrypted(const QString &filePath)
     char magic[SIGN_LEN];
     if (file.read(magic, SIGN_LEN) != SIGN_LEN) {
         file.close();
-        throw new ExceptionUnableToReadSign;
+         throw ExceptionUnableToReadSign();
         //return false;
     }
 
@@ -72,12 +73,12 @@ bool CryptoActions::Encrypt_File(const QString &filePath, const QString &passwor
     //}
     // проверка на наличие сигнатуры
     if(IsFileEncrypted(filePath)){
-        throw new ExceptionFileIsAlreadyEncrypted;
+         throw ExceptionFileIsAlreadyEncrypted();
     }
 
     // 2. Открываем файл для чтения
     if (!inputFile.open(QIODevice::ReadOnly)) {
-        throw new ExceptionUnableToOpenFile;
+         throw ExceptionUnableToOpenFile();
     }
 
     // 3. Читаем содержимое файла в QByteArray
@@ -92,7 +93,7 @@ bool CryptoActions::Encrypt_File(const QString &filePath, const QString &passwor
     // 4. Генерируем случайную соль
     unsigned char salt[SALT_LEN];
     if (RAND_bytes(salt, sizeof(salt)) != 1) {
-        throw new ExceptionOpensslRandbytes;
+        throw ExceptionOpensslRandbytes();
     }
 
     // 5. Преобразуем пароль, соль в key/iv/verifier через PBKDF2
@@ -111,12 +112,12 @@ bool CryptoActions::Encrypt_File(const QString &filePath, const QString &passwor
     // 6. Инициализируем контекст шифрования
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
     if (!ctx) {
-        throw new ExceptionOpensslCipherCTXnew;
+        throw ExceptionOpensslCipherCTXnew();
     }
 
     if (1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr, key, iv)) {
         EVP_CIPHER_CTX_free(ctx);
-        throw new ExceptionOpensslEncryptInit;
+        throw ExceptionOpensslEncryptInit();
     }
 
     // 7. Шифруем данные
@@ -135,7 +136,7 @@ bool CryptoActions::Encrypt_File(const QString &filePath, const QString &passwor
                                reinterpret_cast<unsigned char*>(plainData.data()),
                                plainData.size())) {
         EVP_CIPHER_CTX_free(ctx);
-        throw new ExceptionOpensslEncryptUpdate;
+        throw ExceptionOpensslEncryptUpdate();
     }
     totalLen = outLen;
 
@@ -144,7 +145,7 @@ bool CryptoActions::Encrypt_File(const QString &filePath, const QString &passwor
                                  reinterpret_cast<unsigned char*>(cipherData.data() + totalLen),
                                  &outLen)) {
         EVP_CIPHER_CTX_free(ctx);
-        throw new ExceptionOpensslEncryptFinal;
+        throw ExceptionOpensslEncryptFinal();
     }
     totalLen += outLen;
 
@@ -160,12 +161,12 @@ bool CryptoActions::Encrypt_File(const QString &filePath, const QString &passwor
 
     QFile outputFile(filePath);
     if (!outputFile.open(QIODevice::WriteOnly)) {
-        throw new ExceptionUnableToCreateFile;
+        throw ExceptionUnableToCreateFile();
     }
 
     if (outputFile.write(finalData) != finalData.size()) {
         outputFile.close();
-        throw new ExceptionUnableToWriteEncryptedTextToFile;
+        throw ExceptionUnableToWriteEncryptedTextToFile();
     }
 
     outputFile.close();
@@ -346,16 +347,16 @@ bool CryptoActions::Encrypt_File(const QString &filePath, const QString &passwor
 bool CryptoActions::Decrypt_File(const QString &filePath, const QString &password) {
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly)) {
-        throw new ExceptionUnableToOpenFile;
+        throw ExceptionUnableToOpenFile();
     }
 
     if (file.size() < (SALT_LEN + SIGN_LEN + HASH_LEN)) {
         file.close();
-        throw new ExceptionFileTooSmall;
+        throw ExceptionFileTooSmall();
     }
 
     if(!IsFileEncrypted(filePath)){
-        throw new ExceptionFileIsAlreadyDecrypted;
+        throw ExceptionFileIsAlreadyDecrypted();
     }
 
     QByteArray encryptedData = file.readAll();
@@ -368,7 +369,7 @@ bool CryptoActions::Decrypt_File(const QString &filePath, const QString &passwor
 
     QByteArray derived = deriveKeyMaterial(password, salt);
     if (derived.isEmpty()) {
-        throw new ExceptionOpensslHMAC;
+        throw ExceptionOpensslHMAC();
     }
 
     const unsigned char *derivedBytes = reinterpret_cast<const unsigned char*>(derived.constData());
@@ -377,21 +378,21 @@ bool CryptoActions::Decrypt_File(const QString &filePath, const QString &passwor
     const unsigned char *verifier = derivedBytes + KEY_LEN + IV_LEN;
 
     if (memcmp(verifierFromFile, verifier, HASH_LEN) != 0) {
-        throw new ExceptionIncorrectPassword;
+        throw ExceptionIncorrectPassword();
     }
 
     QByteArray cipherData = encryptedData.mid(SIGN_LEN + SALT_LEN + HASH_LEN);
 
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
     if (!ctx) {
-        throw new ExceptionOpensslCipherCTXnew;
+        throw ExceptionOpensslCipherCTXnew();
     }
 
     if (1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr,
                                 const_cast<unsigned char*>(key),
                                 const_cast<unsigned char*>(iv))) {
         EVP_CIPHER_CTX_free(ctx);
-        throw new ExceptionOpensslDecryptInit;
+        throw ExceptionOpensslDecryptInit();
     }
 
     QByteArray plainData;
@@ -411,7 +412,7 @@ bool CryptoActions::Decrypt_File(const QString &filePath, const QString &passwor
                                  reinterpret_cast<unsigned char*>(plainData.data() + totalLen),
                                  &outLen)) {
         EVP_CIPHER_CTX_free(ctx);
-        throw new ExceptionOpensslDecryptFinal;
+        throw ExceptionOpensslDecryptFinal();
     }
     totalLen += outLen;
 
@@ -427,13 +428,13 @@ bool CryptoActions::Decrypt_File(const QString &filePath, const QString &passwor
 
     QFile outputFile(outputFilePath);
     if (!outputFile.open(QIODevice::WriteOnly)) {
-        throw new ExceptionUnableToCreateFile;
+        throw ExceptionUnableToCreateFile();
     }
 
     if (outputFile.write(plainData) != plainData.size()) {
         outputFile.close();
         outputFile.remove();
-        throw new ExceptionUnableToWriteDecryptedTextToFile;
+        throw ExceptionUnableToWriteDecryptedTextToFile();
     }
 
     outputFile.close();
