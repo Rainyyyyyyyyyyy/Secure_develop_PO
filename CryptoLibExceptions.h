@@ -15,6 +15,7 @@
 #define EXCEPTION_UNABLE_TO_WRITE_FINAL_ENCRYPTED_DATA_TO_FILE 1005
 #define EXCEPTION_UNABLE_TO_WRITE_DECRYPTEDTEXT_TO_FILE 1006
 #define EXCEPTION_UNABLE_TO_READ_SALT_FROM_FILE 1007
+#define EXCEPTION_UNABLE_TO_READ_SIGN_FROM_FILE 1008
 
 #define EXCEPTION_OPENSSL_PKCS5_PBKDF2_HMAC 2001
 #define EXCEPTION_OPENSSL_RAND_bytes 2002   // ошибка RAND_bytes() (генерация соли) openssl)
@@ -27,16 +28,17 @@
 #define EXCEPTION_OPENSSL_EVP_DecryptUpdate 2009 // ошибка в дешифровании блока (openssl)
 #define EXCEPTION_OPENSSL_EVP_DecryptFinal_ex 2010 // ошибка завершения дешифрования (последний блок) (openssl)
 
-#define EXCEPTION_FILE_TOO_SMALL_TO_BE_DECRYPTED 3001 // файл слишком мал, для наличия сигнатуры для дешифрования
+#define EXCEPTION_FILE_TOO_SMALL 3001 // файл слишком мал, для наличия сигнатуры для дешифрования
 #define EXCEPTION_FILE_IS_ALREADY_ENCRYPTED 3002    // файл уже зашифрован
 #define EXCEPTION_FILE_IS_ALREADY_DECRYPTED 3003    // файл уже дешифрован
+#define EXCEPTION_INCORRECT_PASSWORD 3004       // введён неверный пароль ( для дешифрования )
 
 
 // QString.toUtf8() -> QByteArray \
     // QByteArray.constData -> cosnt char*
 
 
-
+// qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
 
  /* Исключение: файл не найден */
 class ExceptionFileNotFound : public Exceptions {
@@ -216,12 +218,12 @@ public:
 };
 
 /* Исключение: файл может быть повреждён, файл слишком мал, для наличия сигнатуры (соли) для дешфирования */
-class ExceptionFileTooSmallToDecrypt : public Exceptions {
+class ExceptionFileTooSmall : public Exceptions {
 public:
-    ExceptionFileTooSmallToDecrypt() : Exceptions(EXCEPTION_FILE_TOO_SMALL_TO_BE_DECRYPTED) {}
+    ExceptionFileTooSmall() : Exceptions(EXCEPTION_FILE_TOO_SMALL) {}
 
     const char *what() const noexcept override {
-        return "File might be corrupted: too small to be encrypted!";
+        return "File might be corrupted: file is too small!";
     }
 };
 
@@ -249,5 +251,25 @@ public:
     }
 };
 
+
+/* Исключение: невозможно прочитать сигнатуру */
+class ExceptionUnableToReadSign : public Exceptions {
+public:
+    ExceptionUnableToReadSign() : Exceptions(EXCEPTION_UNABLE_TO_READ_SIGN_FROM_FILE) {}
+
+    const char *what() const noexcept override {
+        return "Unable to read signature from file!";
+    }
+};
+
+/* Исключение: неверный пароль (для дешифрования) */
+class ExceptionIncorrectPassword : public Exceptions {
+public:
+    ExceptionIncorrectPassword() : Exceptions(EXCEPTION_INCORRECT_PASSWORD) {}
+
+    const char *what() const noexcept override {
+        return "Incorrect password!";
+    }
+};
 
 
