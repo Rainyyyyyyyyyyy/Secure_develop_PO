@@ -34,7 +34,7 @@ namespace {
 
 
 
-bool CryptoActions::IsFileEncrypted(const QString &filePath)
+bool CryptoActionsAES::IsFileEncrypted(const QString &filePath)
 {
     QFile file(filePath);
     if (!file.exists() || !file.open(QIODevice::ReadOnly)) {
@@ -64,7 +64,7 @@ bool CryptoActions::IsFileEncrypted(const QString &filePath)
 }
 
 
-bool CryptoActions::Encrypt_File(const QString &filePath, const QString &password) {
+bool CryptoActionsAES::Encrypt_File(const QString &filePath, const QString &password) {
     // 1. Проверяем, существует ли файл
 
     QFile inputFile(filePath);
@@ -173,7 +173,7 @@ bool CryptoActions::Encrypt_File(const QString &filePath, const QString &passwor
     return 0;
 }
 /*
-bool CryptoActions::Encrypt_File(const QString &filePath, const QString &password){
+bool CryptoActionsAES::Encrypt_File(const QString &filePath, const QString &password){
     //output<<"Encryption Function has called.\n";
     //output.flush();
 
@@ -344,7 +344,7 @@ bool CryptoActions::Encrypt_File(const QString &filePath, const QString &passwor
 
 */
 //  [SIGN][SALT][VERIFIER][CIPHERTEXT]
-bool CryptoActions::Decrypt_File(const QString &filePath, const QString &password) {
+bool CryptoActionsAES::Decrypt_File(const QString &filePath, const QString &password) {
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly)) {
         throw ExceptionUnableToOpenFile();
@@ -446,7 +446,7 @@ bool CryptoActions::Decrypt_File(const QString &filePath, const QString &passwor
 }
 
 /*
-bool CryptoActions::Decrypt_File(const QString &filePath, const QString &password){
+bool CryptoActionsAES::Decrypt_File(const QString &filePath, const QString &password){
     //output<<"Decryption Function has called.\n";
     //output.flush();
 
@@ -620,8 +620,8 @@ bool CryptoActions::Decrypt_File(const QString &filePath, const QString &passwor
 */
 
 
-/*CryptoActions &CryptoActions::Get_Object(){
-    //static CryptoActions Object;
+/*CryptoActionsAES &CryptoActionsAES::Get_Object(){
+    //static CryptoActionsAES Object;
     //return Object;
 }
 QByteArray MakeKeyFromPassword(const QString &password){

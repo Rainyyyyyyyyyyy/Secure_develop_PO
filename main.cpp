@@ -262,7 +262,7 @@ File might be corrupted: too small to be encrypted!   Code:  3001
 
     QVector <QString> Folder_entries_list = Folderr.Entries();
     //return 0;
-    CryptoActions &cry = CryptoActions::Instance();
+    CryptoActionsAES &cry = CryptoActionsAES::Instance();
     QString mode;
     QString MODES[] = {".encrypt", ".decrypt" };
     //QString action;
