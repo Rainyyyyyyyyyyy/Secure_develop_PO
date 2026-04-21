@@ -60,7 +60,7 @@ void FolderTraveler::listContents(const QString &path, int indent) {
         //output<<'\n';
         //output.flush();
         //return;
-        throw new ExceptionFolderNotFould;
+        throw ExceptionFolderNotFould();
     }
 
     // Получаем список всех файлов и папок (включая скрытые)

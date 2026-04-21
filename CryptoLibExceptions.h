@@ -15,6 +15,7 @@
 #define EXCEPTION_UNABLE_TO_WRITE_FINAL_ENCRYPTED_DATA_TO_FILE 1005
 #define EXCEPTION_UNABLE_TO_WRITE_DECRYPTEDTEXT_TO_FILE 1006
 #define EXCEPTION_UNABLE_TO_READ_SALT_FROM_FILE 1007
+#define EXCEPTION_UNABLE_TO_READ_SIGN_FROM_FILE 1008
 
 #define EXCEPTION_OPENSSL_PKCS5_PBKDF2_HMAC 2001
 #define EXCEPTION_OPENSSL_RAND_bytes 2002   // ошибка RAND_bytes() (генерация соли) openssl)
@@ -27,83 +28,58 @@
 #define EXCEPTION_OPENSSL_EVP_DecryptUpdate 2009 // ошибка в дешифровании блока (openssl)
 #define EXCEPTION_OPENSSL_EVP_DecryptFinal_ex 2010 // ошибка завершения дешифрования (последний блок) (openssl)
 
-#define EXCEPTION_FILE_TOO_SMALL_TO_BE_DECRYPTED 3001 // файл слишком мал, для наличия сигнатуры для дешифрования
+#define EXCEPTION_FILE_TOO_SMALL 3001 // файл слишком мал, для наличия сигнатуры для дешифрования
+#define EXCEPTION_FILE_IS_ALREADY_ENCRYPTED 3002    // файл уже зашифрован
+#define EXCEPTION_FILE_IS_ALREADY_DECRYPTED 3003    // файл уже дешифрован
+#define EXCEPTION_INCORRECT_PASSWORD 3004       // введён неверный пароль ( для дешифрования )
 
 
 // QString.toUtf8() -> QByteArray \
     // QByteArray.constData -> cosnt char*
 
 
-
+// qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
 
  /* Исключение: файл не найден */
-class ExceptionFileNotFound : public Exceptions {
+class ExceptionFileNotFound : public CustomExceptions {
 public:
-    ExceptionFileNotFound() : Exceptions(EXCEPTION_FILE_NOT_FOUND) {}
-
-    const char *what() const noexcept override {
-        return "File not Found!";
-    }
+    ExceptionFileNotFound() : CustomExceptions(EXCEPTION_FILE_NOT_FOUND, "File not found!") {}
 };
 
 /* Исключение: невозможно открыть файл */
-class ExceptionUnableToOpenFile : public Exceptions {
+class ExceptionUnableToOpenFile : public CustomExceptions {
 public:
-    ExceptionUnableToOpenFile() : Exceptions(EXCEPTION_UNABLE_TO_OPEN_FILE) {}
-
-    const char *what() const noexcept override {
-        return "Unable to open file!";
-    }
+    ExceptionUnableToOpenFile() : CustomExceptions(EXCEPTION_UNABLE_TO_OPEN_FILE, "Unable to open file!") {}
 };
 
 /* Исключение: невозможно создать файл */
-class ExceptionUnableToCreateFile : public Exceptions {
+class ExceptionUnableToCreateFile : public CustomExceptions {
 public:
-    ExceptionUnableToCreateFile() : Exceptions(EXCEPTION_UNABLE_TO_CREATE_FILE) {}
-
-    const char *what() const noexcept override {
-        return "Unable to create file!";
-    }
+    ExceptionUnableToCreateFile() : CustomExceptions(EXCEPTION_UNABLE_TO_CREATE_FILE, "Unable to create file!") {}
 };
 
 /* Исключение: ошибка при записи в файл зашифрованных данных  */
-class ExceptionUnableToWriteEncryptedTextToFile : public Exceptions {
+class ExceptionUnableToWriteEncryptedTextToFile : public CustomExceptions {
 public:
-    ExceptionUnableToWriteEncryptedTextToFile() : Exceptions(EXCEPTION_UNABLE_TO_WRITE_ENCRYPTEDTEXT_TO_FILE) {}
-
-    const char *what() const noexcept override {
-        return "Unable to write encrypted text to file!";
-    }
+    ExceptionUnableToWriteEncryptedTextToFile() : CustomExceptions(EXCEPTION_UNABLE_TO_WRITE_ENCRYPTEDTEXT_TO_FILE, "Unable to write encrypted text to file!") {}
 };
 
 /* Исключение: ошибка при записи в файл дешифрованных данных */
-class ExceptionUnableToWriteDecryptedTextToFile : public Exceptions {
+class ExceptionUnableToWriteDecryptedTextToFile : public CustomExceptions {
 public:
-    ExceptionUnableToWriteDecryptedTextToFile() : Exceptions(EXCEPTION_UNABLE_TO_WRITE_DECRYPTEDTEXT_TO_FILE) {}
-
-    const char *what() const noexcept override {
-        return "Unable to write decrypted text to file!";
-    }
+    ExceptionUnableToWriteDecryptedTextToFile() : CustomExceptions(EXCEPTION_UNABLE_TO_WRITE_DECRYPTEDTEXT_TO_FILE, "Inable to write decrypted text to file!") {}
 };
 
 /* Исключение: невозможно дописать последний блок шифрования в файл */
-class ExceptionUnableToWriteFinalDataToFile : public Exceptions {
+class ExceptionUnableToWriteFinalDataToFile : public CustomExceptions {
 public:
-    ExceptionUnableToWriteFinalDataToFile() : Exceptions(EXCEPTION_UNABLE_TO_WRITE_FINAL_ENCRYPTED_DATA_TO_FILE) {}
-
-    const char *what() const noexcept override {
-        return "Unable to write final data to file!";
-    }
+    ExceptionUnableToWriteFinalDataToFile() : CustomExceptions(EXCEPTION_UNABLE_TO_WRITE_FINAL_ENCRYPTED_DATA_TO_FILE, "Unable to write final data to file!") {}
 };
 
 /* Исключение: невозможно прочитать сигнатуру (соль) из файла для дешифрования*/
-class ExceptionUnableToReadSalt : public Exceptions {
+class ExceptionUnableToReadSalt : public CustomExceptions {
 public:
-    ExceptionUnableToReadSalt() : Exceptions(EXCEPTION_UNABLE_TO_READ_SALT_FROM_FILE) {}
-
-    const char *what() const noexcept override {
-        return "Unable to read salt from file!";
-    }
+    ExceptionUnableToReadSalt() : CustomExceptions(EXCEPTION_UNABLE_TO_READ_SALT_FROM_FILE, "Unable to read salt from file!") {}
 };
 
 /*
@@ -114,113 +90,98 @@ public:
 
 
 /* Исключение: ошибка в функции PKCS5_PBKDF2_HMAC() библиотеки OpenSSL */
-class ExceptionOpensslHMAC : public Exceptions {
+class ExceptionOpensslHMAC : public CustomExceptions {
 public:
-    ExceptionOpensslHMAC() : Exceptions(EXCEPTION_OPENSSL_PKCS5_PBKDF2_HMAC) {}
-
-    const char *what() const noexcept override {
-        return "Error: PKCS5_PBKDF2_HMAC() completed with problem!";
-    }
+    ExceptionOpensslHMAC() : CustomExceptions(EXCEPTION_OPENSSL_PKCS5_PBKDF2_HMAC, "Error: PKCS5_PBKDF2_HMAC() completed with problem!") {}
 };
 
 /* Исключение: невозможно дописать "соль" в файл */
-class ExceptionOpensslWriteSaltToFile : public Exceptions {
+class ExceptionOpensslWriteSaltToFile : public CustomExceptions {
 public:
-    ExceptionOpensslWriteSaltToFile() : Exceptions(EXCEPTION_OPENSSL_UNABLE_TO_WRITE_SALT) {}
-
-    const char *what() const noexcept override {
-        return "Unable to write salt to file!";
-    }
+    ExceptionOpensslWriteSaltToFile() : CustomExceptions(EXCEPTION_OPENSSL_UNABLE_TO_WRITE_SALT, "Unable ti write salt to file!") {}
 };
 
 /* Исключение: ошибка функции  EVP_CIPHER_CTX_new() библиотеки OpenSSL */
-class ExceptionOpensslCipherCTXnew : public Exceptions {
+class ExceptionOpensslCipherCTXnew : public CustomExceptions {
 public:
-    ExceptionOpensslCipherCTXnew() : Exceptions(EXCEPTION_OPENSSL_EVP_CIPHER_CTX_new) {}
-
-    const char *what() const noexcept override {
-        return "Error: EVP_CIPHER_CTX_new() completed with problem!";
-    }
+    ExceptionOpensslCipherCTXnew() : CustomExceptions(EXCEPTION_OPENSSL_EVP_CIPHER_CTX_new, "Error: EVP_CIPHER_CTX_new() completed with problem!") {}
 };
 
 /* Исключение: ошибка функции EVP_EncryptInit_ex()  библиотеки OpenSSL */
-class ExceptionOpensslEncryptInit : public Exceptions {
+class ExceptionOpensslEncryptInit : public CustomExceptions {
 public:
-    ExceptionOpensslEncryptInit() : Exceptions(EXCEPTION_OPENSSL_EVP_EncryptInit_ex) {}
-
-    const char *what() const noexcept override {
-        return "Error: EVP_EncryptInit_ex() completed with problem!";
-    }
+    ExceptionOpensslEncryptInit() : CustomExceptions(EXCEPTION_OPENSSL_EVP_EncryptInit_ex, "Error: EVP_EncryptInit_ex() completed with problem!") {}
 };
 
 /* Исключение: ошибка функции EVP_EncryptInit_ex()  библиотеки OpenSSL */
-class ExceptionOpensslDecryptInit : public Exceptions {
+class ExceptionOpensslDecryptInit : public CustomExceptions {
 public:
-    ExceptionOpensslDecryptInit() : Exceptions(EXCEPTION_OPENSSL_EVP_DecryptInit_ex) {}
-
-    const char *what() const noexcept override {
-        return "Error: EVP_DecryptInit_ex() completed with problem!";
-    }
+    ExceptionOpensslDecryptInit() : CustomExceptions(EXCEPTION_OPENSSL_EVP_DecryptInit_ex, "Error: EVP_DecryptInit_ex() completed with problem") {}
 };
 
 /* Исключение: ошибка функции EVP_EncryptUpdate()  библиотеки OpenSSL */
-class ExceptionOpensslEncryptUpdate : public Exceptions {
+class ExceptionOpensslEncryptUpdate : public CustomExceptions {
 public:
-    ExceptionOpensslEncryptUpdate() : Exceptions(EXCEPTION_OPENSSL_EVP_EncryptUpdate) {}
-
-    const char *what() const noexcept override {
-        return "Error: EVP_EncryptUpdate() completed with problem!";
-    }
+    ExceptionOpensslEncryptUpdate() : CustomExceptions(EXCEPTION_OPENSSL_EVP_EncryptUpdate, "Error: EVP_EncryptUpdate() completed with problem") {}
 };
 
 /* Исключение: ошибка функции EVP_EncryptUpdate()  библиотеки OpenSSL */
-class ExceptionOpensslDecryptUpdate : public Exceptions {
+class ExceptionOpensslDecryptUpdate : public CustomExceptions {
 public:
-    ExceptionOpensslDecryptUpdate() : Exceptions(EXCEPTION_OPENSSL_EVP_DecryptUpdate) {}
-
-    const char *what() const noexcept override {
-        return "Error: EVP_DecryptUpdate() completed with problem!";
-    }
+    ExceptionOpensslDecryptUpdate() : CustomExceptions(EXCEPTION_OPENSSL_EVP_DecryptUpdate, "Error: EVP_DecryptUpdate() completed with problem!") {}
 };
 
 /* Исключение: ошибка функции EVP_EncryptFinal_ex()  библиотеки OpenSSL */
-class ExceptionOpensslEncryptFinal : public Exceptions {
+class ExceptionOpensslEncryptFinal : public CustomExceptions {
 public:
-    ExceptionOpensslEncryptFinal() : Exceptions(EXCEPTION_OPENSSL_EVP_EncryptFinal_ex) {}
-
-    const char *what() const noexcept override {
-        return "Error: EVP_EncryptFinal_ex() compelted with problem!";
-    }
+    ExceptionOpensslEncryptFinal() : CustomExceptions(EXCEPTION_OPENSSL_EVP_EncryptFinal_ex, "Error: EVP_EncryptFinal_ex() completed with problem!") {}
 };
 
 /* Исключение: ошибка функции EVP_EncryptFinal_ex()  библиотеки OpenSSL */
-class ExceptionOpensslDecryptFinal : public Exceptions {
+class ExceptionOpensslDecryptFinal : public CustomExceptions {
 public:
-    ExceptionOpensslDecryptFinal() : Exceptions(EXCEPTION_OPENSSL_EVP_DecryptFinal_ex) {}
-
-    const char *what() const noexcept override {
-        return "Error: EVP_DecryptFinal_ex() compelted with problem!";
-    }
+    ExceptionOpensslDecryptFinal() : CustomExceptions(EXCEPTION_OPENSSL_EVP_DecryptFinal_ex, "Error: EVP_DecryptFinal_ex() completed with problem!") {}
 };
 
 /* Исключение: ошибка функции RAND_bytes()  библиотеки OpenSSL */
-class ExceptionOpensslRandbytes : public Exceptions {
+class ExceptionOpensslRandbytes : public CustomExceptions {
 public:
-    ExceptionOpensslRandbytes() : Exceptions(EXCEPTION_OPENSSL_RAND_bytes) {}
-
-    const char *what() const noexcept override {
-        return "Error: RAND_bytes() completed with problem!";
-    }
+    ExceptionOpensslRandbytes() : CustomExceptions(EXCEPTION_OPENSSL_RAND_bytes, "Error: RAND_bytes() completed with problem!") {}
 };
 
 /* Исключение: файл может быть повреждён, файл слишком мал, для наличия сигнатуры (соли) для дешфирования */
-class ExceptionFileTooSmallToDecrypt : public Exceptions {
+class ExceptionFileTooSmall : public CustomExceptions {
 public:
-    ExceptionFileTooSmallToDecrypt() : Exceptions(EXCEPTION_FILE_TOO_SMALL_TO_BE_DECRYPTED) {}
+    ExceptionFileTooSmall() : CustomExceptions(EXCEPTION_FILE_TOO_SMALL, "File might be corrupted: file is too small!") {}
+};
 
-    const char *what() const noexcept override {
-        return "File might be corrupted: too small to be encrypted!";
-    }
+
+
+
+
+/* Исключение: файл уже зашифрован */
+class ExceptionFileIsAlreadyEncrypted : public CustomExceptions {
+public:
+    ExceptionFileIsAlreadyEncrypted() : CustomExceptions(EXCEPTION_FILE_IS_ALREADY_ENCRYPTED, "File is already encrypted") {}
+};
+
+/* Исключение: файл уже дешифрован */
+class ExceptionFileIsAlreadyDecrypted : public CustomExceptions {
+public:
+    ExceptionFileIsAlreadyDecrypted() : CustomExceptions(EXCEPTION_FILE_IS_ALREADY_DECRYPTED, "File is already decrypted!") {}
+};
+
+
+/* Исключение: невозможно прочитать сигнатуру */
+class ExceptionUnableToReadSign : public CustomExceptions {
+public:
+    ExceptionUnableToReadSign() : CustomExceptions(EXCEPTION_UNABLE_TO_READ_SIGN_FROM_FILE, "Unable to read signature from file!") {}
+};
+
+/* Исключение: неверный пароль (для дешифрования) */
+class ExceptionIncorrectPassword : public CustomExceptions {
+public:
+    ExceptionIncorrectPassword() : CustomExceptions(EXCEPTION_INCORRECT_PASSWORD, "Incorrect password!") {}
 };
 
 
