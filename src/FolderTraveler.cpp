@@ -1,5 +1,49 @@
 #include "FolderTraveler.h"
 
+#ifdef Q_OS_WIN
+#include <windows.h>
+#endif
+
+#ifdef Q_OS_UNIX
+#include <sys/stat.h>
+#endif
+
+namespace {
+
+bool isSystemEntry(const QFileInfo &entry)
+{
+#ifdef Q_OS_WIN
+    const std::wstring path = entry.absoluteFilePath().toStdWString();
+    const DWORD attrs = GetFileAttributesW(path.c_str());
+    if (attrs == INVALID_FILE_ATTRIBUTES) {
+        return false;
+    }
+    return (attrs & FILE_ATTRIBUTE_SYSTEM) != 0;
+#elif defined(Q_OS_UNIX)
+    const QString p = entry.absoluteFilePath();
+    if (p == "/proc" || p == "/sys" || p == "/dev" || p == "/run" ||
+        p.startsWith("/proc/") || p.startsWith("/sys/") ||
+        p.startsWith("/dev/") || p.startsWith("/run/")) {
+        return true;
+    }
+
+    struct stat st {};
+    const QByteArray nativePath = p.toLocal8Bit();
+    if (::stat(nativePath.constData(), &st) != 0) {
+        return false;
+    }
+
+    // Не добавляем специальные узлы ФС (device/fifo/socket).
+    return S_ISCHR(st.st_mode) || S_ISBLK(st.st_mode) ||
+           S_ISFIFO(st.st_mode) || S_ISSOCK(st.st_mode);
+#else
+    Q_UNUSED(entry);
+    return false;
+#endif
+}
+
+}
+
 // для вывода
 QTextStream FolderTraveler:: input = QTextStream(stdin);
 QTextStream FolderTraveler::output = QTextStream(stdout);
@@ -91,7 +135,7 @@ void FolderTraveler::listContents(const QString &path, int indent) {
             }
         } else {
             // добавление файла в список файлов
-            if(entry.suffix().toLower() != "lnk"){
+            if(entry.suffix().toLower() != "lnk" && !isSystemEntry(entry)){
                 File_Path_List.push_back(entry.absoluteFilePath());
             }
             // Выводим файл с информацией о размере
