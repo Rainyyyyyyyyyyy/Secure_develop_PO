@@ -37,7 +37,7 @@ INCLUDEPATH += C:/Qt/Tools/mingw810_64/opt/include \
 # Путь к библиотекам
 #LIBS += -LC:/Qt/Tools/mingw810_64/opt/lib -lcrypto -lssl
 LIBS +=  -LC:/Qt/Tools/mingw810_64/opt/lib -lcrypto -lssl \
-             -LC:/Qt/Tools/mingw810_64/opt/bin -leay32 \
+             #-LC:/Qt/Tools/mingw810_64/opt/bin -leay32 \
              -LE:/Qt/Qt/Tools/mingw810_64/opt/lib -lcrypto -lssl
 
 HEADERS += \
