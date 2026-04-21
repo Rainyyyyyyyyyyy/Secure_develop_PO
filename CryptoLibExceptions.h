@@ -31,13 +31,14 @@
 #define EXCEPTION_FILE_TOO_SMALL 3001 // файл слишком мал, для наличия сигнатуры для дешифрования
 #define EXCEPTION_FILE_IS_ALREADY_ENCRYPTED 3002    // файл уже зашифрован
 #define EXCEPTION_FILE_IS_ALREADY_DECRYPTED 3003    // файл уже дешифрован
+#define EXCEPTION_INCORRECT_PASSWORD 3004       // введён неверный пароль ( для дешифрования )
 
 
 // QString.toUtf8() -> QByteArray \
     // QByteArray.constData -> cosnt char*
 
 
-
+// qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
 
  /* Исключение: файл не найден */
 class ExceptionFileNotFound : public Exceptions {
@@ -261,5 +262,14 @@ public:
     }
 };
 
+/* Исключение: неверный пароль (для дешифрования) */
+class ExceptionIncorrectPassword : public Exceptions {
+public:
+    ExceptionIncorrectPassword() : Exceptions(EXCEPTION_INCORRECT_PASSWORD) {}
+
+    const char *what() const noexcept override {
+        return "Incorrect password!";
+    }
+};
 
 

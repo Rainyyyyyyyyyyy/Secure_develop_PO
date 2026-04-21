@@ -14,6 +14,8 @@
 #include "FolderTraveler.h"
 #include "CryptoLib.h"          // includes CryptoLibExceptions.h
 
+#include <iostream>
+
 QTextStream input(stdin);
 QTextStream output(stdout);
 
@@ -33,7 +35,28 @@ bool checkACTiON(const QString *actions, int size, const QString &s){
     return false;
 }
 int main(int argc, char *argv[]) {
-    //QCoreApplication app(argc, argv);
+/*
+    QString ss;
+    input>>ss;
+    CryptoActions &lol = CryptoActions::Instance();
+    QByteArray ss_hashed = lol.hash_from_key(ss);
+
+    QFile filee("E:\\Z_vsyakoe_dla_echeby\\4k2sem\\SEcure_Develop_PO(Andreeva)\\laba1_test_files\\Encrypt_Folder_tests\\test2\\file0.txt");//("E:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1_test_files/Encrypt_Folder_tests/test2/file0.txt");
+    // "E:\\Z_vsyakoe_dla_echeby\\4k2sem\\SEcure_Develop_PO(Andreeva)\\laba1_test_files\\Encrypt_Folder_tests\\test2\\file0.txt"
+    filee.write(ss_hashed);
+    filee.close();
+    QFile filee_r;
+    filee_r.open(QIODevice::ReadOnly | QIODevice::Text);
+    QByteArray ss_hashed_from_file = filee_r.readAll();
+    for(int i=0; i<HASH_LEN; i++){
+        std::cout<<(int)ss_hashed[i]<<'\t';
+    }
+    std::cout<<'\n';
+    for(int i=0; i<HASH_LEN; i++){
+        std::cout<<(int)ss_hashed_from_file[i]<<'\t';
+    }
+    return 0;
+        //QCoreApplication app(argc, argv);
 
     /* Проверка работы класса Exceptions: public std::exception */
     /*
@@ -190,6 +213,7 @@ File might be corrupted: too small to be encrypted!   Code:  3001
             [Folder]papka3
     */
     // E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Folder_tests
+    // E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1\Qt\try7_gitclone\papki
 
     QString folderPath;
     FolderTraveler Folderr;
@@ -260,16 +284,17 @@ File might be corrupted: too small to be encrypted!   Code:  3001
     do{
         qDebug()<<"Enter password: ";
         Password = input.readLine();
+        Password.detach();
 
         qDebug()<<"Password: "<<Password<<Qt::endl;
         qDebug()<<"Enter action('.reset' or skip): ";
         current_UI_action = input.readLine();
     }while(current_UI_action == ".reset");
 
-
+    // E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Folder_tests\test2
     if(mode == ".encrypt"){
         for(int i=0; i<Folder_entries_list.size(); i++){
-            qDebug()<<Folder_entries_list[i]<<Qt::endl;
+            qDebug()<<Folder_entries_list[i];
             try
             {
                 cry.Encrypt_File(Folder_entries_list[i], Password);//(Path_to_encrypt_file, Password_to_encrypt);
