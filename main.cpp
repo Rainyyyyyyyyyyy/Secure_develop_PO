@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
     }
     return 0;
         //QCoreApplication app(argc, argv);
-
+*/
     /* Проверка работы класса Exceptions: public std::exception */
     /*
     Exceptions *excp;
@@ -226,17 +226,16 @@ File might be corrupted: too small to be encrypted!   Code:  3001
             if(folderPath[0] == 'C' || folderPath[0] == 'c'){
                 //qDebug()<<"No disk C!";
                 folderPath = "";
-                throw new ExceptionFolderFromDiskC; //continue;
+                throw ExceptionFolderFromDiskC(); //continue;
             }
             if(folderPath == ""){
                 //qDebug()<<"NO";
                 //return 0;
-                throw new ExceptionFolderNotFould;
+                throw ExceptionFolderNotFould();
             }
         }
-        catch (const Exceptions *excp){
-            qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
-            delete excp;
+        catch (const CustomExceptions &excp ){
+            qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
             continue;
         }
         try{
@@ -246,10 +245,8 @@ File might be corrupted: too small to be encrypted!   Code:  3001
             output.flush();
             Folderr.TravelFolder();
         }
-        catch (const Exceptions *excp){
-            qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
-            delete excp;
-
+        catch (const CustomExceptions &excp){
+            qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
             Folderr.clear();
             continue;
         }
@@ -298,9 +295,8 @@ File might be corrupted: too small to be encrypted!   Code:  3001
             try
             {
                 cry.Encrypt_File(Folder_entries_list[i], Password);//(Path_to_encrypt_file, Password_to_encrypt);
-            } catch(const Exceptions * excp){
-                    qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
-                    delete excp;
+            } catch(const CustomExceptions &excp){
+                qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
             }
                 //break;
         }
@@ -310,9 +306,8 @@ File might be corrupted: too small to be encrypted!   Code:  3001
             try
             {
                 cry.Decrypt_File(Folder_entries_list[i], Password);//(Path_to_encrypt_file, Password_to_encrypt);
-            } catch(const Exceptions * excp){
-                qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
-                delete excp;
+            } catch(const CustomExceptions &excp){
+                qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
             }
         }
         //break;

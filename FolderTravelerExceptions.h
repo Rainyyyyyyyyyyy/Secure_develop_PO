@@ -12,22 +12,14 @@
 
 
 /* Исключение: папка не найдена */
-class ExceptionFolderNotFould : public Exceptions {
+class ExceptionFolderNotFould : public CustomExceptions {
 public:
-    ExceptionFolderNotFould() : Exceptions(EXCEPTION_FOLDER_NOT_FOULD){}
-
-    const char * what() const noexcept override{
-        return "Error: folder not found!";
-    }
+    ExceptionFolderNotFould() : CustomExceptions(EXCEPTION_FOLDER_NOT_FOULD, "Error: folder not found!"){}
 };
 
 /* Исключение: папка из диска С */
-class ExceptionFolderFromDiskC : public Exceptions {
+class ExceptionFolderFromDiskC : public CustomExceptions {
 public:
-    ExceptionFolderFromDiskC() : Exceptions(EXCEPTION_FOLDER_FROM_DISK_C){}
-
-    const char * what() const noexcept override{
-        return "Warning! Folder from disk C!";
-    }
+    ExceptionFolderFromDiskC() : CustomExceptions(EXCEPTION_FOLDER_FROM_DISK_C, "Warning! Folder from disk C!"){}
 };
 

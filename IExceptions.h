@@ -2,25 +2,21 @@
 #define IEXCEPTIONS_H
 
 #include <exception>    // из std
+#include <string>
 
-class Exceptions : public std::exception{
+class CustomExceptions : public std::exception{
 protected:
-    int errorCode;           // код ошибки\исключения
+    unsigned int errorCode;           // код ошибки\исключения
+    std::string message;    // описание
 
 public:
-    // what() будет переопределяться в каждом наследнике
-    virtual const char *what() const noexcept = 0;
-    // деструктор
-    virtual ~Exceptions() = default;
-    // конструктор по умолчанию
-    Exceptions() : errorCode(0) {}
-    // конструктор по значению
-    Exceptions(int code) : errorCode(code) {}
+    CustomExceptions(unsigned int code__, const char * message__) : errorCode(code__), message(message__) {};
+
+    const char *what() const noexcept override{ return message.c_str(); }
 
     // getter кода ошибки/исключения
-    int getCode() const { return errorCode; }
+    unsigned int getCode() const { return errorCode; }
 };
-
 
 
 #endif // IEXCEPTIONS_H
