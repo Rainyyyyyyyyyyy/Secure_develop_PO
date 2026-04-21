@@ -1,17 +1,37 @@
 #include "CryptoLib.h"
 
 
+#include <iostream>
+#include <cstring>
+
+// анонимное namespace известное только и только этому файлу - файлу CryptoLib.cpp
+namespace {
+
+    // длина хеша 32+16+32
+    constexpr int DERIVED_LEN = KEY_LEN + IV_LEN + HASH_LEN;
+
+    // хешируем ключ password и соль salt
+    QByteArray deriveKeyMaterial(const QString &password, const unsigned char salt[SALT_LEN]){
+        QByteArray passwordBytes = password.toUtf8();
+        QByteArray derived;
+        derived.resize(DERIVED_LEN);
+
+        if (!PKCS5_PBKDF2_HMAC(passwordBytes.constData(), passwordBytes.size(),
+                               salt, SALT_LEN,
+                               ITERATIONS,
+                               EVP_sha256(),
+                               DERIVED_LEN,
+                               reinterpret_cast<unsigned char*>(derived.data()))) {
+            return QByteArray();
+        }
+
+    return derived;
+    }
+
+}
 
 
 
-
-// Константы для алгоритма
-const int KEY_LEN = 32;      // 256 бит для AES-256
-const int IV_LEN = 16;       // 16 байт для AES
-const int SALT_LEN = 16;     // 16 байт соли
-const int ITERATIONS = 10000; // 10000 итераций PBKDF2
-const int SIGN_LEN = 16;    // 16 байт для сигнатуры
-const QByteArray Signature_Sequence = "A66B06F945C9B57E";
 
 bool CryptoActions::IsFileEncrypted(const QString &filePath)
 {
@@ -39,7 +59,7 @@ bool CryptoActions::IsFileEncrypted(const QString &filePath)
     file.close();
 
     // Сравниваем с нашей сигнатурой
-    return memcmp(magic, Signature_Sequence, SIGN_LEN) == 0;
+    return memcmp(magic, Signature_Sequence.constData(), SIGN_LEN) == 0;
 }
 
 
@@ -75,19 +95,18 @@ bool CryptoActions::Encrypt_File(const QString &filePath, const QString &passwor
         throw new ExceptionOpensslRandbytes;
     }
 
-    // 5. Преобразуем пароль в ключ и IV через PBKDF2
+    // 5. Преобразуем пароль, соль в key/iv/verifier через PBKDF2
     unsigned char key[KEY_LEN];
     unsigned char iv[IV_LEN];
-    QByteArray passwordBytes = password.toUtf8();
+    unsigned char verifier[HASH_LEN];
 
-    if (!PKCS5_PBKDF2_HMAC(passwordBytes.constData(), passwordBytes.size(),
-                           salt, sizeof(salt),
-                           ITERATIONS,
-                           EVP_sha256(),
-                           KEY_LEN + IV_LEN, key)) {
+    QByteArray derived = deriveKeyMaterial(password, salt);
+    if (derived.isEmpty()) {
         throw new ExceptionOpensslHMAC;
     }
-    memcpy(iv, key + KEY_LEN, IV_LEN);
+    memcpy(key, derived.constData(), KEY_LEN);
+    memcpy(iv, derived.constData() + KEY_LEN, IV_LEN);
+    memcpy(verifier, derived.constData() + KEY_LEN + IV_LEN, HASH_LEN);
 
     // 6. Инициализируем контекст шифрования
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
@@ -129,18 +148,16 @@ bool CryptoActions::Encrypt_File(const QString &filePath, const QString &passwor
     }
     totalLen += outLen;
 
-    // Обрезаем QByteArray до реального размера
     cipherData.resize(totalLen);
 
     EVP_CIPHER_CTX_free(ctx);
 
-    // 8. Формируем итоговый файл: [SIGN][SALT][CIPHERTEXT]
     QByteArray finalData;
-    finalData.append(reinterpret_cast<const char*>(Signature_Sequence.data()), SIGN_LEN);
+    finalData.append(Signature_Sequence.constData(), SIGN_LEN);
     finalData.append(reinterpret_cast<const char*>(salt), SALT_LEN);
+    finalData.append(reinterpret_cast<const char*>(verifier), HASH_LEN);
     finalData.append(cipherData);
 
-    // 9. Открываем файл на запись (перезаписываем исходный файл)
     QFile outputFile(filePath);
     if (!outputFile.open(QIODevice::WriteOnly)) {
         throw new ExceptionUnableToCreateFile;
@@ -325,15 +342,14 @@ bool CryptoActions::Encrypt_File(const QString &filePath, const QString &passwor
 }
 
 */
+//  [SIGN][SALT][VERIFIER][CIPHERTEXT]
 bool CryptoActions::Decrypt_File(const QString &filePath, const QString &password) {
-    // 1. Открываем файл
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly)) {
         throw new ExceptionUnableToOpenFile;
     }
 
-    // 2. Проверяем минимальный размер
-    if (file.size() < (SALT_LEN + SIGN_LEN)) {
+    if (file.size() < (SALT_LEN + SIGN_LEN + HASH_LEN)) {
         file.close();
         throw new ExceptionFileTooSmall;
     }
@@ -342,35 +358,38 @@ bool CryptoActions::Decrypt_File(const QString &filePath, const QString &passwor
         throw new ExceptionFileIsAlreadyDecrypted;
     }
 
-    // 3. Читаем файл
     QByteArray encryptedData = file.readAll();
     file.close();
-    // 4.0 Извлекаем сигнатуру
 
-    // 4. Извлекаем соль и шифротекст
     unsigned char salt[SALT_LEN];
+    unsigned char verifierFromFile[HASH_LEN];
     memcpy(salt, encryptedData.constData() + SIGN_LEN, SALT_LEN);
-    QByteArray cipherData = encryptedData.mid(SALT_LEN + SIGN_LEN);
+    memcpy(verifierFromFile, encryptedData.constData() + SIGN_LEN + SALT_LEN, HASH_LEN);
 
-    // 5. Получаем ключ и IV
-    unsigned char key[KEY_LEN];
-    unsigned char iv[IV_LEN];
-    QByteArray passwordBytes = password.toUtf8();
-
-    if (!PKCS5_PBKDF2_HMAC(passwordBytes.constData(), passwordBytes.size(),
-                           salt, SALT_LEN, ITERATIONS,
-                           EVP_sha256(), KEY_LEN + IV_LEN, key)) {
+    QByteArray derived = deriveKeyMaterial(password, salt);
+    if (derived.isEmpty()) {
         throw new ExceptionOpensslHMAC;
     }
-    memcpy(iv, key + KEY_LEN, IV_LEN);
 
-    // 6. Расшифровываем
+    const unsigned char *derivedBytes = reinterpret_cast<const unsigned char*>(derived.constData());
+    const unsigned char *key = derivedBytes;
+    const unsigned char *iv = derivedBytes + KEY_LEN;
+    const unsigned char *verifier = derivedBytes + KEY_LEN + IV_LEN;
+
+    if (memcmp(verifierFromFile, verifier, HASH_LEN) != 0) {
+        throw new ExceptionIncorrectPassword;
+    }
+
+    QByteArray cipherData = encryptedData.mid(SIGN_LEN + SALT_LEN + HASH_LEN);
+
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
     if (!ctx) {
         throw new ExceptionOpensslCipherCTXnew;
     }
 
-    if (1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr, key, iv)) {
+    if (1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr,
+                                const_cast<unsigned char*>(key),
+                                const_cast<unsigned char*>(iv))) {
         EVP_CIPHER_CTX_free(ctx);
         throw new ExceptionOpensslDecryptInit;
     }
@@ -399,7 +418,6 @@ bool CryptoActions::Decrypt_File(const QString &filePath, const QString &passwor
     plainData.resize(totalLen);
     EVP_CIPHER_CTX_free(ctx);
 
-    // 7. Определяем выходной файл (убираем .enc, если есть)
     QString outputFilePath = filePath;
     if (outputFilePath.endsWith(".enc")) {
         outputFilePath.chop(4);
@@ -407,7 +425,6 @@ bool CryptoActions::Decrypt_File(const QString &filePath, const QString &passwor
         //outputFilePath += ".dec";
     }
 
-    // 8. Сохраняем результат
     QFile outputFile(outputFilePath);
     if (!outputFile.open(QIODevice::WriteOnly)) {
         throw new ExceptionUnableToCreateFile;
