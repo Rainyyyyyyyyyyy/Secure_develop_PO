@@ -43,16 +43,6 @@ private:
 
     bool IsFileEncrypted(const QString &filePath);
 
-    // hash функция
-    QByteArray hash_from_key(const QString &data);
-
-    // сравнить хеш полученный и хеш из password
-    bool checkHashPassword(const QByteArray &gotHash, const QString &password);
-    // сравнить хеш полученный и хеш из password
-    //bool checkHashPassword(const QByteArray &gotHash, const char *password, const unsigned int &n);
-    bool checkHashPassword(const unsigned char gotHash[HASH_LEN], const QString &password);
-    //bool checkHashPassword(const char *gotHash, const QString &password);
-
 // =    =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =
 
 
@@ -60,7 +50,7 @@ private:
     CryptoActionsAES(const CryptoActionsAES&) = delete;
     CryptoActionsAES() {}    // конструктор без реализации
     ~CryptoActionsAES() {}    // и деструктор
-    CryptoActionsAES& operator=(CryptoActionsAES const&); // и присваивание
+    CryptoActionsAES& operator=(CryptoActionsAES const&) = delete; // и присваивание
 
 public:
 
