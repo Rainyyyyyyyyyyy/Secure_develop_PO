@@ -161,15 +161,6 @@ File might be corrupted: too small to be encrypted!   Code:  3001
     //return 0;
 
 
-    /* // проверка работы openssl (например openssl/rand.h и необходимой для неё libeay32.dll
-     * // ...\Qt\Tools\mingw810_64\opt\bin\libeay32.dll
-    unsigned char chara[4] = {0,0,0,0};
-    RAND_bytes(chara, 4);
-    for(int i=0; i<4; i++)output<<chara[i]<<' ';
-    output.flush();
-    input.readLine();
-    return 0;
-*/
 
     // вывод версии openssl
     output<<OPENSSL_VERSION_TEXT<<'\n';
@@ -218,6 +209,8 @@ File might be corrupted: too small to be encrypted!   Code:  3001
     QString folderPath;
     FolderTraveler Folderr;
     QString current_UI_action = ".reset";
+
+    qDebug()<<"Enter '.exit' on any stage to exit from program."<<Qt::endl;
     do{
         Folderr.clear();
         try {
@@ -233,8 +226,11 @@ File might be corrupted: too small to be encrypted!   Code:  3001
                 //return 0;
                 throw ExceptionFolderNotFould();
             }
+            if(folderPath.contains("..") || folderPath.contains(".")){
+                throw ExceptionDotOrDotDot();
+            }
         }
-        catch (const CustomExceptions &excp ){
+        catch (const CustomExceptions &excp){
             qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
             continue;
         }
@@ -255,6 +251,9 @@ File might be corrupted: too small to be encrypted!   Code:  3001
 
         qDebug()<<"Enter action ('.reset', or skip)"<<Qt::endl;
         current_UI_action = input.readLine();
+        if(current_UI_action == ".exit"){
+            return 0;
+        }
     }while(current_UI_action == ".reset");
 
     //qDebug()<<"Ended program."<<Qt::endl;
@@ -273,7 +272,9 @@ File might be corrupted: too small to be encrypted!   Code:  3001
     do{
         qDebug()<<"Enter mode ('.encrypt', '.decrypt'): ";
         mode = input.readLine();
-
+        if(mode == ".exit"){
+            return 0;
+        }
     }while(checkMODE(MODES, 2, mode) == false);
 
     // запрос пароля
@@ -286,6 +287,9 @@ File might be corrupted: too small to be encrypted!   Code:  3001
         qDebug()<<"Password: "<<Password<<Qt::endl;
         qDebug()<<"Enter action('.reset' or skip): ";
         current_UI_action = input.readLine();
+        if(current_UI_action == ".exit"){
+            return 0;
+        }
     }while(current_UI_action == ".reset");
 
     // E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Folder_tests\test2

@@ -18,7 +18,7 @@ private:
     QString Folder_Path;
 
 
-    static QTextStream input; //(stdin);
+    //static QTextStream input; //(stdin);
     static QTextStream output; //(stdout);
 
 

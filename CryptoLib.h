@@ -34,12 +34,7 @@ const QByteArray Signature_Sequence = "A66B06F945C9B57E";
 
 // class singleton для шифрования и дешифрования файлов
 class CryptoActionsAES: public InterfaceCryptoActions {
-
 private:
-
-
-
-
 
     bool IsFileEncrypted(const QString &filePath);
 
