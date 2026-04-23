@@ -4,7 +4,6 @@
 #endif // INTERFACECRYPTOLIB_H
 
 #include <QString>
-#include <QTextStream>
 
 class InterfaceCryptoActions {
 private:
