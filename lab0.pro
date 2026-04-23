@@ -16,10 +16,10 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 # E:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1/lib_Cryptopp_unpacked/cryptopp
-INCLUDEPATH += E:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1/lib_Cryptopp_unpacked/cryptopp
+# INCLUDEPATH += E:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1/lib_Cryptopp_unpacked/cryptopp
 # INCLUDEPATH += "C:\msys64\ucrt64\include\cryptopp"
 #LIBS += -LC:/msys64/ucrt64/lib -lcryptopp
-LIBS += -LE:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1/lib_Cryptopp_unpacked/cryptopp -lcryptopp
+# LIBS += -LE:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1/lib_Cryptopp_unpacked/cryptopp -lcryptopp
 # Путь к заголовкам Crypto++ (установленным через MSYS2)
 #INCLUDEPATH += C:/msys64/mingw64/include/cryptopp
 
@@ -28,13 +28,17 @@ LIBS += -LE:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1/lib_C
 
 
 # Путь к заголовкам OpenSSL
-INCLUDEPATH += E:/Qt/Qt/Tools/mingw810_64/opt/include
+#INCLUDEPATH += E:/Qt/Qt/Tools/mingw810_64/opt/include
+INCLUDEPATH += C:/Qt/Tools/mingw810_64/opt/include \
+                            E:/Qt/Qt/Tools/mingw810_64/opt/include
 # Путь к заголовкам OpenSSL
 # INCLUDEPATH += C:/msys64/ucrt64/include
 
 # Путь к библиотекам
 #LIBS += -LC:/Qt/Tools/mingw810_64/opt/lib -lcrypto -lssl
-LIBS +=  -LE:/Qt/Qt/Tools/mingw810_64/opt/lib -lcrypto -lssl
+LIBS +=  -LC:/Qt/Tools/mingw810_64/opt/lib -lcrypto -lssl \
+             #-LC:/Qt/Tools/mingw810_64/opt/bin -leay32 \
+             -LE:/Qt/Qt/Tools/mingw810_64/opt/lib -lcrypto -lssl
 
 HEADERS += \
     CryptoLibExceptions.h \

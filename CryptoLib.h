@@ -33,7 +33,7 @@ const QByteArray Signature_Sequence = "A66B06F945C9B57E";
 
 
 // class singleton для шифрования и дешифрования файлов
-class CryptoActions: public InterfaceCryptoActions {
+class CryptoActionsAES: public InterfaceCryptoActions {
 
 private:
 
@@ -41,22 +41,22 @@ private:
 
 
 
-
+    bool IsFileEncrypted(const QString &filePath);
 
 // =    =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =
 
 
     // запрет на копирование
-    CryptoActions(const CryptoActions&) = delete;
-    CryptoActions() {}    // конструктор без реализации
-    ~CryptoActions() {}    // и деструктор
-    CryptoActions& operator=(CryptoActions const&); // и присваивание
+    CryptoActionsAES(const CryptoActionsAES&) = delete;
+    CryptoActionsAES() {}    // конструктор без реализации
+    ~CryptoActionsAES() {}    // и деструктор
+    CryptoActionsAES& operator=(CryptoActionsAES const&) = delete; // и присваивание
 
 public:
 
     // функция-getter объекта класса (ссылка & на объект)
-    static CryptoActions &Instance(){
-        static CryptoActions s;
+    static CryptoActionsAES &Instance(){
+        static CryptoActionsAES s;
         return s;
     }
 
@@ -64,17 +64,6 @@ public:
     bool Encrypt_File(const QString &filePath, const QString &password) override;
     bool Decrypt_File(const QString &filePath, const QString &password) override;
 
-    bool IsFileEncrypted(const QString &filePath);
-
-    // hash функция
-    QByteArray hash_from_key(const QString &data);
-
-    // сравнить хеш полученный и хеш из password
-    bool checkHashPassword(const QByteArray &gotHash, const QString &password);
-    // сравнить хеш полученный и хеш из password
-    //bool checkHashPassword(const QByteArray &gotHash, const char *password, const unsigned int &n);
-    bool checkHashPassword(const unsigned char gotHash[HASH_LEN], const QString &password);
-    //bool checkHashPassword(const char *gotHash, const QString &password);
 
 
 // =    =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =
