@@ -1,0 +1,4 @@
+file1.txt plaintext
+apple
+watermelon
+car

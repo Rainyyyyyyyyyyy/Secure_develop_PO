@@ -1,0 +1,5 @@
+file4.txt plaintext
+one
+two
+three
+four
