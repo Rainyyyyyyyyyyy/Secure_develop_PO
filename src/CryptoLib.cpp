@@ -1,8 +1,15 @@
 #include "CryptoLib.h"
+#include "CryptoLibExceptions.h"
 
+#include <QDebug>
+#include <QFile>
+#include <QFileInfo>
+#include <QByteArray>
+#include <QCryptographicHash>
 
-#include <iostream>
-#include <cstring>
+#include <openssl/evp.h>
+#include <openssl/rand.h>
+#include <openssl/err.h>
 
 // анонимное namespace известное только и только этому файлу - файлу CryptoLib.cpp
 namespace {
@@ -43,14 +50,17 @@ bool CryptoActionsAES::IsFileEncrypted(const QString &filePath)
     QFile file(filePath);
     if (!file.exists() || !file.open(QIODevice::ReadOnly)) {
             throw ExceptionUnableToOpenFile();
-        //return false;
     }
 
+    /*if(file.size() == 0){
+            file.close();
+            throw ExceptionFileIsEmpty();
+    }
+    */
     // Проверяем, достаточно ли размера для сигнатуры
     if (file.size() < SIGN_LEN) {
         file.close();
-            throw ExceptionFileTooSmall();
-        //return false;
+            return false;//throw ExceptionFileTooSmall();
     }
 
     // Читаем сигнатуру
@@ -83,6 +93,10 @@ bool CryptoActionsAES::Encrypt_File(const QString &filePath, const QString &pass
     // проверка на наличие сигнатуры
     if(IsFileEncrypted(filePath)){
          throw ExceptionFileIsAlreadyEncrypted();
+    }else{
+         if(inputFile.size() == 0){
+             throw ExceptionFileIsEmpty();
+         }
     }
 
     // 2. Открываем файл для чтения
@@ -94,10 +108,10 @@ bool CryptoActionsAES::Encrypt_File(const QString &filePath, const QString &pass
     QByteArray plainData = inputFile.readAll();
     inputFile.close();
 
-    if (plainData.isEmpty()) {
+    /*if (plainData.isEmpty()) {
         //throw new ExceptionEmptyFile;
         qDebug()<<"Warning: Empty file: "<<filePath<<Qt::flush;
-    }
+    }*/
 
     // 4. Генерируем случайную соль
     unsigned char salt[SALT_LEN];

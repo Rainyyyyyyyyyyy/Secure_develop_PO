@@ -8,14 +8,13 @@
 #include "IExceptions.h"
 
 
-#define EXCEPTION_FILE_NOT_FOUND 1001
-#define EXCEPTION_UNABLE_TO_OPEN_FILE 1002
-#define EXCEPTION_UNABLE_TO_CREATE_FILE 1003
-#define EXCEPTION_UNABLE_TO_WRITE_ENCRYPTEDTEXT_TO_FILE 1004
-#define EXCEPTION_UNABLE_TO_WRITE_FINAL_ENCRYPTED_DATA_TO_FILE 1005
-#define EXCEPTION_UNABLE_TO_WRITE_DECRYPTEDTEXT_TO_FILE 1006
-#define EXCEPTION_UNABLE_TO_READ_SALT_FROM_FILE 1007
-#define EXCEPTION_UNABLE_TO_READ_SIGN_FROM_FILE 1008
+#define EXCEPTION_FILE_NOT_FOUND 1001   // файл не найден
+#define EXCEPTION_UNABLE_TO_OPEN_FILE 1002  // не удалось открыть файл
+#define EXCEPTION_UNABLE_TO_CREATE_FILE 1003    // не удалось создать файл
+#define EXCEPTION_UNABLE_TO_WRITE_ENCRYPTEDTEXT_TO_FILE 1004    // не удалось записать шифртекст в файл
+#define EXCEPTION_UNABLE_TO_WRITE_DECRYPTEDTEXT_TO_FILE 1006    // не удалось записать дешифрованный текст в файл
+#define EXCEPTION_UNABLE_TO_READ_SIGN_FROM_FILE 1008    // не удалось прочитать сигнатуру
+#define EXCEPTION_FILE_IS_EMPTY 1009    // файл пуст
 
 #define EXCEPTION_OPENSSL_PKCS5_PBKDF2_HMAC 2001
 #define EXCEPTION_OPENSSL_RAND_bytes 2002   // ошибка RAND_bytes() (генерация соли) openssl)
@@ -34,11 +33,6 @@
 #define EXCEPTION_INCORRECT_PASSWORD 3004       // введён неверный пароль ( для дешифрования )
 
 
-// QString.toUtf8() -> QByteArray \
-    // QByteArray.constData -> cosnt char*
-
-
-// qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
 
  /* Исключение: файл не найден */
 class ExceptionFileNotFound : public CustomExceptions {
@@ -70,17 +64,6 @@ public:
     ExceptionUnableToWriteDecryptedTextToFile() : CustomExceptions(EXCEPTION_UNABLE_TO_WRITE_DECRYPTEDTEXT_TO_FILE, "Inable to write decrypted text to file!") {}
 };
 
-/* Исключение: невозможно дописать последний блок шифрования в файл */
-class ExceptionUnableToWriteFinalDataToFile : public CustomExceptions {
-public:
-    ExceptionUnableToWriteFinalDataToFile() : CustomExceptions(EXCEPTION_UNABLE_TO_WRITE_FINAL_ENCRYPTED_DATA_TO_FILE, "Unable to write final data to file!") {}
-};
-
-/* Исключение: невозможно прочитать сигнатуру (соль) из файла для дешифрования*/
-class ExceptionUnableToReadSalt : public CustomExceptions {
-public:
-    ExceptionUnableToReadSalt() : CustomExceptions(EXCEPTION_UNABLE_TO_READ_SALT_FROM_FILE, "Unable to read salt from file!") {}
-};
 
 /*
  *   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =
@@ -156,6 +139,11 @@ public:
 };
 
 
+/*
+ *   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =
+ *  =   =   =   =   Исключения во время работы функций         =
+ *  =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =
+*/
 
 
 
@@ -184,4 +172,9 @@ public:
     ExceptionIncorrectPassword() : CustomExceptions(EXCEPTION_INCORRECT_PASSWORD, "Incorrect password!") {}
 };
 
+/* Исключение: файл пуст */
+class ExceptionFileIsEmpty : public CustomExceptions {
+public:
+    ExceptionFileIsEmpty() : CustomExceptions(EXCEPTION_FILE_IS_EMPTY, "Warning: file is empty!") {}
+};
 
