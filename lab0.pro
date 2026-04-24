@@ -26,19 +26,33 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 
 
-
 # Путь к заголовкам OpenSSL
 #INCLUDEPATH += E:/Qt/Qt/Tools/mingw810_64/opt/include
-INCLUDEPATH += C:/Qt/Tools/mingw810_64/opt/include \
-                            E:/Qt/Qt/Tools/mingw810_64/opt/include
+###INCLUDEPATH += C:/Qt/Tools/mingw810_64/opt/include \
+                           ### E:/Qt/Qt/Tools/mingw810_64/opt/include
 # Путь к заголовкам OpenSSL
 # INCLUDEPATH += C:/msys64/ucrt64/include
 
 # Путь к библиотекам
 #LIBS += -LC:/Qt/Tools/mingw810_64/opt/lib -lcrypto -lssl
-LIBS +=  -LC:/Qt/Tools/mingw810_64/opt/lib -lcrypto -lssl \
+###LIBS +=  -LC:/Qt/Tools/mingw810_64/opt/lib -lcrypto -lssl \
              #-LC:/Qt/Tools/mingw810_64/opt/bin -leay32 \
-             -LE:/Qt/Qt/Tools/mingw810_64/opt/lib -lcrypto -lssl
+      ###       -LE:/Qt/Qt/Tools/mingw810_64/opt/lib -lcrypto -lssl
+
+
+
+# OpenSSL из установленного Qt/Tools (без привязки к букве диска).
+# Для типичной структуры: <QtRoot>/Tools/mingw810_64/opt
+QT_ROOT = $$clean_path($$[QT_HOST_PREFIX]/../..)
+OPENSSL_ROOT = $$clean_path($$QT_ROOT/Tools/mingw810_64/opt)
+
+exists($$OPENSSL_ROOT/include/openssl/ssl.h) {
+        INCLUDEPATH += $$OPENSSL_ROOT/include
+        LIBS += -L$$OPENSSL_ROOT/lib -lcrypto -lssl
+}
+#else {
+#        warning("OpenSSL not found at $$OPENSSL_ROOT. Check MinGW folder name in lab0.pro")
+#}
 
 HEADERS += \
     CryptoLibExceptions.h \
