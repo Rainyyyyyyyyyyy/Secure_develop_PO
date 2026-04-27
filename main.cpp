@@ -4,18 +4,13 @@
 //#include <QTextStream>
 #include <windows.h>
 #include <vector>
-
 #include <QVector>
 
-// Присоединилась openssl!!!
-//#include <openssl/crypto.h>
-#include <openssl/rand.h>
-
 #include "FolderTraveler.h"
-#include "CryptoLib.h"          // includes CryptoLibExceptions.h
+#include "CryptoLib.h"          // includes CryptoLibExceptions.h and openssl
 
 #include <iostream>
-
+#include <openssl/opensslv.h>
 QTextStream input(stdin);
 QTextStream output(stdout);
 
@@ -35,31 +30,153 @@ bool checkACTiON(const QString *actions, int size, const QString &s){
     return false;
 }
 int main(int argc, char *argv[]) {
-/*
-    QString ss;
-    input>>ss;
-    CryptoActions &lol = CryptoActions::Instance();
-    QByteArray ss_hashed = lol.hash_from_key(ss);
 
-    QFile filee("E:\\Z_vsyakoe_dla_echeby\\4k2sem\\SEcure_Develop_PO(Andreeva)\\laba1_test_files\\Encrypt_Folder_tests\\test2\\file0.txt");//("E:/Z_vsyakoe_dla_echeby/4k2sem/SEcure_Develop_PO(Andreeva)/laba1_test_files/Encrypt_Folder_tests/test2/file0.txt");
-    // "E:\\Z_vsyakoe_dla_echeby\\4k2sem\\SEcure_Develop_PO(Andreeva)\\laba1_test_files\\Encrypt_Folder_tests\\test2\\file0.txt"
-    filee.write(ss_hashed);
-    filee.close();
-    QFile filee_r;
-    filee_r.open(QIODevice::ReadOnly | QIODevice::Text);
-    QByteArray ss_hashed_from_file = filee_r.readAll();
-    for(int i=0; i<HASH_LEN; i++){
-        std::cout<<(int)ss_hashed[i]<<'\t';
+
+    // вывод версии openssl
+    output<<OPENSSL_VERSION_TEXT<<'\n';
+    output.flush();
+
+    // для вывода кириллицы
+    SetConsoleCP(12051);
+    SetConsoleOutputCP(12051);
+
+
+
+    QString folderPath;
+    FolderTraveler Folderr;
+    QString current_UI_action = ".reset";
+
+    qDebug()<<"\n\n==========================\nEnter '.exit' on any stage to exit from program.\n=========================="<<Qt::endl;
+    // запрос пути к папке
+    do{
+        Folderr.clear();
+        try {
+            qDebug()<<"Enter path to directory: "<<Qt::flush;
+            folderPath = input.readLine();
+            if(folderPath[0] == 'C' || folderPath[0] == 'c'){
+                folderPath = "";
+                throw ExceptionFolderFromDiskC();
+            }
+            if(folderPath == ""){
+                throw ExceptionFolderNotFould();
+            }
+            if(folderPath.contains("..") || folderPath.contains(".")){
+                throw ExceptionDotOrDotDot();
+            }
+        }
+        catch (const CustomExceptions &excp){
+            qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
+            continue;
+        }
+
+        try{
+            Folderr.SetPath(folderPath);
+            output << "\nContent of  " << folderPath << ":\n";
+            output << "====================================\n";
+            output.flush();
+            Folderr.TravelFolder();
+        }
+        catch (const CustomExceptions &excp){
+            qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
+            Folderr.clear();
+            continue;
+        }
+
+        Folderr.OutputList();
+
+        qDebug()<<"Enter action ('.reset', or skip)"<<Qt::endl;
+        current_UI_action = input.readLine();
+        if(current_UI_action == ".exit"){
+            return 0;
+        }
+    }while(current_UI_action == ".reset");
+
+
+
+    QVector <QString> Folder_entries_list = Folderr.Entries();
+    CryptoActionsAES &cry = CryptoActionsAES::Instance();
+    QString mode;
+    QString MODES[] = {".encrypt", ".decrypt" };
+    QString Password;           // example "password";
+
+    // запрос режима
+    do{
+        qDebug()<<"Enter mode ('.encrypt', '.decrypt'): ";
+        mode = input.readLine();
+        if(mode == ".exit"){
+            return 0;
+        }
+    }while(mode != ".encrypt" && mode != ".decrypt"); //checkMODE(MODES, 2, mode) == false);
+
+    // запрос пароля
+    current_UI_action = ".reset";
+    do{
+        qDebug()<<"Enter password: ";
+        Password = input.readLine();
+        Password.detach();
+
+        qDebug()<<"Password: "<<Password<<Qt::endl;
+        qDebug()<<"Enter action('.reset' or skip): ";
+        current_UI_action = input.readLine();
+        if(current_UI_action == ".exit"){
+            return 0;
+        }
+    }while(current_UI_action == ".reset");
+
+    if(mode == ".encrypt"){
+        for(int i=0; i<Folder_entries_list.size(); i++){
+            qDebug()<<Folder_entries_list[i];
+            try
+            {
+                cry.Encrypt_File(Folder_entries_list[i], Password); //(Path_to_encrypt_file, Password_to_encrypt);
+            } catch(const CustomExceptions &excp){
+                qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
+            }
+        }
+    }else if(mode == ".decrypt"){
+        for(int i=0; i<Folder_entries_list.size(); i++){
+            qDebug()<<Folder_entries_list[i];
+            try
+            {
+                cry.Decrypt_File(Folder_entries_list[i], Password); //(Path_to_encrypt_file, Password_to_encrypt);
+            } catch(const CustomExceptions &excp){
+                qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
+            }
+        }
     }
-    std::cout<<'\n';
-    for(int i=0; i<HASH_LEN; i++){
-        std::cout<<(int)ss_hashed_from_file[i]<<'\t';
-    }
+
+
     return 0;
-        //QCoreApplication app(argc, argv);
-*/
-    /* Проверка работы класса Exceptions: public std::exception */
-    /*
+
+    // tests: E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Files_tests\emptytext.txt
+    //          E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Files_tests\plaintext.txt
+    //          E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Folder_tests\test1
+    // password: "password"
+
+}
+
+
+// output:
+/*
+    [Folder]FolderTraveler_tests
+        [Folder]papka1
+            [File]file1.txt (0 B)
+            [File]file2.txt (0 B)
+            [File]file3.txt (0 B)
+            [Folder]papka4
+                [File]file1.txt (17 B)
+            [Folder]papka2
+                [File]file2.txt.yarl.lnk (0 B)
+            [Folder]papka3
+    */
+// E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Folder_tests
+
+
+
+
+
+/* Проверка работы класса Exceptions: public std::exception */
+/*
     Exceptions *excp;
     // 1001
     excp  = new ExceptionFileNotFound;
@@ -138,7 +255,7 @@ int main(int argc, char *argv[]) {
     qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
     delete excp;
     */
-    /* Output:
+/* Output:
 File not Found!   Code:  1001
 Unable to open file!   Code:  1002
 Unable to create file!   Code:  1003
@@ -158,216 +275,5 @@ Error: EVP_DecryptUpdate() completed with problem!   Code:  2009
 Error: EVP_DecryptFinal_ex() compelted with problem!   Code:  2010
 File might be corrupted: too small to be encrypted!   Code:  3001
 */  // correct
-    //return 0;
 
 
-    /* // проверка работы openssl (например openssl/rand.h и необходимой для неё libeay32.dll
-     * // ...\Qt\Tools\mingw810_64\opt\bin\libeay32.dll
-    unsigned char chara[4] = {0,0,0,0};
-    RAND_bytes(chara, 4);
-    for(int i=0; i<4; i++)output<<chara[i]<<' ';
-    output.flush();
-    input.readLine();
-    return 0;
-*/
-
-    // вывод версии openssl
-    output<<OPENSSL_VERSION_TEXT<<'\n';
-    output.flush();
-
-    // для вывода кириллицы
-    SetConsoleCP(12051);
-    SetConsoleOutputCP(12051);
-
-
-    //output << "Enter path to folder: ";
-    //output.flush();
-    // примеры
-    // H:\Documents\Secure_tools_AndreevaVV\TRUE_REPO
-    // E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1\Qt\try3_gitclone
-    // E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1\Qt\try3_gitclone\Libraries\cryptopp(defeat)
-    // E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1\Qt\try7_gitclone\papki
-
-    /* Проверка FolderTraveler */
-    /*
-    QString folderPathtest = "E:\\Z_vsyakoe_dla_echeby\\4k2sem\\SEcure_Develop_PO(Andreeva)\\laba1_test_files";
-    FolderTraveler TestFolder_NoLnk(folderPathtest);
-    TestFolder_NoLnk.TravelFolder();
-    QVector <QString> testNoLnk = TestFolder_NoLnk.Entries();
-    for(int i=0; i<testNoLnk.size(); i++){
-        qDebug()<<testNoLnk[i];
-    }
-    return 0;
-*/
-    // output:
-    /*
-    [Folder]FolderTraveler_tests
-        [Folder]papka1
-            [File]file1.txt (0 B)
-            [File]file2.txt (0 B)
-            [File]file3.txt (0 B)
-            [Folder]papka4
-                [File]file1.txt (17 B)
-            [Folder]papka2
-                [File]file2.txt.yarl.lnk (0 B)
-            [Folder]papka3
-    */
-    // E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Folder_tests
-    // E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1\Qt\try7_gitclone\papki
-
-    QString folderPath;
-    FolderTraveler Folderr;
-    QString current_UI_action = ".reset";
-    do{
-        Folderr.clear();
-        try {
-            qDebug()<<"Enter path to directory: "<<Qt::flush;
-            folderPath = input.readLine();
-            if(folderPath[0] == 'C' || folderPath[0] == 'c'){
-                //qDebug()<<"No disk C!";
-                folderPath = "";
-                throw ExceptionFolderFromDiskC(); //continue;
-            }
-            if(folderPath == ""){
-                //qDebug()<<"NO";
-                //return 0;
-                throw ExceptionFolderNotFould();
-            }
-        }
-        catch (const CustomExceptions &excp ){
-            qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
-            continue;
-        }
-        try{
-            Folderr.SetPath(folderPath);
-            output << "\nContent of  " << folderPath << ":\n";
-            output << "====================================\n";
-            output.flush();
-            Folderr.TravelFolder();
-        }
-        catch (const CustomExceptions &excp){
-            qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
-            Folderr.clear();
-            continue;
-        }
-
-        Folderr.OutputList();
-
-        qDebug()<<"Enter action ('.reset', or skip)"<<Qt::endl;
-        current_UI_action = input.readLine();
-    }while(current_UI_action == ".reset");
-
-    //qDebug()<<"Ended program."<<Qt::endl;
-    //return 0;
-
-    QVector <QString> Folder_entries_list = Folderr.Entries();
-    //return 0;
-    CryptoActionsAES &cry = CryptoActionsAES::Instance();
-    QString mode;
-    QString MODES[] = {".encrypt", ".decrypt" };
-    //QString action;
-    //QString UI_ACTIONS[] = {".exit", ".reset", ".mode", ".password" };
-    QString Password;// = "password";
-
-    // запрос режима
-    do{
-        qDebug()<<"Enter mode ('.encrypt', '.decrypt'): ";
-        mode = input.readLine();
-
-    }while(checkMODE(MODES, 2, mode) == false);
-
-    // запрос пароля
-    current_UI_action = ".reset";
-    do{
-        qDebug()<<"Enter password: ";
-        Password = input.readLine();
-        Password.detach();
-
-        qDebug()<<"Password: "<<Password<<Qt::endl;
-        qDebug()<<"Enter action('.reset' or skip): ";
-        current_UI_action = input.readLine();
-    }while(current_UI_action == ".reset");
-
-    // E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Folder_tests\test2
-    if(mode == ".encrypt"){
-        for(int i=0; i<Folder_entries_list.size(); i++){
-            qDebug()<<Folder_entries_list[i];
-            try
-            {
-                cry.Encrypt_File(Folder_entries_list[i], Password);//(Path_to_encrypt_file, Password_to_encrypt);
-            } catch(const CustomExceptions &excp){
-                qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
-            }
-                //break;
-        }
-    }else if(mode == ".decrypt"){
-        for(int i=0; i<Folder_entries_list.size(); i++){
-            qDebug()<<Folder_entries_list[i]<<Qt::endl;
-            try
-            {
-                cry.Decrypt_File(Folder_entries_list[i], Password);//(Path_to_encrypt_file, Password_to_encrypt);
-            } catch(const CustomExceptions &excp){
-                qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
-            }
-        }
-        //break;
-    }
-
-
-    return 0;
-
-    // tests: E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Files_tests\emptytext.txt
-    //          E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Files_tests\plaintext.txt
-    //          E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Folder_tests\test1
-    // password: "password"
-    /*
-     * зашифрованный файл - <имя_исходного_файла>.enc
-     * дешифрованный файл - <имя_исходного_файла>.dec
-     *
-     */
-
-    /*
-    output<<"Enter path to file: ";
-    output.flush();
-    QString Path_to_encrypt_file = input.readLine();
-    output<<"Enter password to encrypt: ";
-    output.flush();
-    //QString Password_to_encrypt = input.readLine();
-*/
-    //CryptoActions &cry = CryptoActions::Instance();
-
-    // идеи для consoleUI:
-    /*пароль начинается обязательно с буквы
-     *  (и тем более не пустой)
-     *  Ограничен например 8-32 символа
-     *  Состоит из букв (заглавных и прописных)
-     *   английского алфавита и спец. символов
-     *  ! * ( ) , . / +
-     *
-     *  Служебное слово ".exit" для выхода из программы
-     *  Служебное слово ".change" для изменения пути к папку\файлу
-     *  Служебное слово ".mode" для изменения режима "Encrypt/Decrypt"
-     *
-     *  Служебные слова применимы на любой стадии (ввод пути, ввод пароля, ввод режима)
-     *  и после завершения возвращают на первую стадию (например выбор режима)
-     *  (либо оставляют на этой же стадии)
-     */
-/*
-    try{
-    // E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1\Qt\try7_gitclone\papki\asd.txt
-        cry.Encrypt_File(Path_to_encrypt_file, Password_to_encrypt);
-        qDebug()<<"\n"<<Qt::flush;
-        cry.Decrypt_File(Path_to_encrypt_file + ".enc", Password_to_encrypt);
-    }
-    catch(const Exceptions *excp){
-        qDebug()<<(excp->what())<<"  Code: "<<excp->getCode();
-        delete excp;
-    }
-*/
-    //CryptoActions::Instance().Encrypt_File("abc","abckey");
-
-
-
-
-    return 0;
-}

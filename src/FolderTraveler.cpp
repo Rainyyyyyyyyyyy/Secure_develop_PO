@@ -8,102 +8,118 @@
 #include <sys/stat.h>
 #endif
 
+
+#include <QDebug>
+#include <QDir>
+
+// анонимное namespace известное этому и только этому файлу (FolderTraveler.cpp)
 namespace {
+/*
+ * Windows:
+ *      системный файл ((GetFileAttributes() & FILE_ATTRIBUTE_SYSTEM) == true) -> return true
+ *      несистемный файл ((GetFileAttributes() & FILE_ATTRIBUTE_SYSTEM) == false) -> return false
+ * Unix:
+ *      файл в одной из подсистемных папок:
+ *      /proc
+ *      /sys
+ *      /dev
+ *      /run
+ *      либо содержит в полном пути эти папки -> return true
+ *      файл вне подсистемных папок:
+ *       /proc
+ *      /sys
+ *      /dev
+ *      /run
+ *      и не содержит в полном пути этих папок -> return false
+*/
+bool isSystemEntry(const QFileInfo &entry){
+    #ifdef Q_OS_WIN
+        const std::wstring path = entry.absoluteFilePath().toStdWString();
+        const DWORD attrs = GetFileAttributesW(path.c_str());
+        if (attrs == INVALID_FILE_ATTRIBUTES) {
+            return false;
+        }
+        return (attrs & FILE_ATTRIBUTE_SYSTEM) != 0;
+    #elif defined(Q_OS_UNIX)
+        const QString p = entry.absoluteFilePath();
+        if (p == "/proc" || p == "/sys" || p == "/dev" || p == "/run" ||
+            p.startsWith("/proc/") || p.startsWith("/sys/") ||
+            p.startsWith("/dev/") || p.startsWith("/run/")) {
+            return true;
+        }
 
-bool isSystemEntry(const QFileInfo &entry)
-{
-#ifdef Q_OS_WIN
-    const std::wstring path = entry.absoluteFilePath().toStdWString();
-    const DWORD attrs = GetFileAttributesW(path.c_str());
-    if (attrs == INVALID_FILE_ATTRIBUTES) {
-        return false;
-    }
-    return (attrs & FILE_ATTRIBUTE_SYSTEM) != 0;
-#elif defined(Q_OS_UNIX)
-    const QString p = entry.absoluteFilePath();
-    if (p == "/proc" || p == "/sys" || p == "/dev" || p == "/run" ||
-        p.startsWith("/proc/") || p.startsWith("/sys/") ||
-        p.startsWith("/dev/") || p.startsWith("/run/")) {
-        return true;
-    }
+        struct stat st {};
+        const QByteArray nativePath = p.toLocal8Bit();
+        if (::stat(nativePath.constData(), &st) != 0) {
+            return false;
+        }
 
-    struct stat st {};
-    const QByteArray nativePath = p.toLocal8Bit();
-    if (::stat(nativePath.constData(), &st) != 0) {
-        return false;
-    }
-
-    // Не добавляем специальные узлы ФС (device/fifo/socket).
-    return S_ISCHR(st.st_mode) || S_ISBLK(st.st_mode) ||
+        // Не добавляем специальные узлы ФС (device/fifo/socket).
+        return S_ISCHR(st.st_mode) || S_ISBLK(st.st_mode) ||
            S_ISFIFO(st.st_mode) || S_ISSOCK(st.st_mode);
-#else
-    Q_UNUSED(entry);
-    return false;
-#endif
+    #else
+        Q_UNUSED(entry);
+        return false;
+    #endif
 }
 
 }
 
-// для вывода
-QTextStream FolderTraveler:: input = QTextStream(stdin);
-QTextStream FolderTraveler::output = QTextStream(stdout);
+
+//QTextStream FolderTraveler::output = QTextStream(stdout);
 
 
 void FolderTraveler::TravelFolder(){ //const QString &path){
-    listContents(Folder_Path);
+    listContents(folderPath);
 }
 
 // конструктор по QString
 FolderTraveler::FolderTraveler(QString &path){
-    Folder_Path = path;
+    folderPath = path;
 }
 
 
 // вывод списка путей к файлам в обозреваемой папке
 void FolderTraveler::OutputList() const{
-    for(int i=0; i<File_Path_List.size(); i++){
-        output<<File_Path_List[i]<<'\n';
+    for(int i=0; i<pathList.size(); i++){
+        qDebug()<<pathList[i];
     }
-    output.flush();
 }
 
 
 
 // getter пути к папке
 const QString FolderTraveler::Path() const {
-    return Folder_Path;
+    return folderPath;
 }
 
 // getter внутренних файлов
 const QVector <QString> FolderTraveler::Entries() const {
-    return File_Path_List;
+    return pathList;
 }
 
 
 // вывод пути к обозреваемой папке
 void FolderTraveler::OutputPath() const{
-    output<<Folder_Path;
-    output.flush();
+    qDebug()<<folderPath;
 }
 
 
 
 // очистить список
 void FolderTraveler::clear(){
-    Folder_Path = "";
-    File_Path_List.clear();
+    folderPath = "";
+    pathList.clear();
 }
 
-
+/*
+ * Пустая папка: File_Path_List пустой и throw ExceptionFolderIsEmpty()
+ */
 void FolderTraveler::listContents(const QString &path, int indent) {
     QDir dir(path);
 
     // Проверяем, существует ли папка
     if (!dir.exists()) {
-        //output << "No Folder:" << path;
-        //output<<'\n';
-        //output.flush();
-        //return;
         throw ExceptionFolderNotFould();
     }
 
@@ -121,22 +137,21 @@ void FolderTraveler::listContents(const QString &path, int indent) {
             // если так, то игнорировать её
             if(entry.suffix().toLower() != "lnk"){
                 // Выводим папку
-                output << indentStr + "[Folder]" + entry.fileName();
-                output<<'\n';
-                output.flush();
+                qDebug() << indentStr + "[Folder]" + entry.fileName();
+
                 // Рекурсивно обходим содержимое папки
                 listContents(entry.absoluteFilePath(), indent + 1);
             }else{
                 // Выводим ярлык на папку
-                output << indentStr + "[Folder.lnk]" + entry.fileName();
-                output<<'\n';
-                output.flush();
+                qDebug() << indentStr + "[Folder.lnk]" + entry.fileName();
+
                 // и НЕ продолжаем рекурсию
             }
         } else {
             // добавление файла в список файлов
+            // с проверкой на ярлык.lnk и системные атрибуты
             if(entry.suffix().toLower() != "lnk" && !isSystemEntry(entry)){
-                File_Path_List.push_back(entry.absoluteFilePath());
+                pathList.push_back(entry.absoluteFilePath());
             }
             // Выводим файл с информацией о размере
             QString sizeStr;    // для вывода
@@ -152,14 +167,22 @@ void FolderTraveler::listContents(const QString &path, int indent) {
                 sizeStr = QString::number(size / (1024.0 * 1024.0 * 1024.0), 'f', 2) + " GB";
             }
             if(entry.suffix().toLower() != "lnk")
-            output << indentStr + "[File]" + entry.fileName() + " (" + sizeStr + ")";
-            else output << indentStr + "[File.lnk]" + entry.fileName() + " (" + sizeStr + ")";
-            output<<'\n';
-            output.flush();
+            qDebug() << indentStr + "[File]" + entry.fileName() + " (" + sizeStr + ")";
+            else qDebug() << indentStr + "[File.lnk]" + entry.fileName() + " (" + sizeStr + ")";
         }
+    }
+    if(pathList.size() == 0){
+        throw ExceptionFolderIsEmpty();
     }
 }
 
+
+// setter нового пути к папке
+void FolderTraveler::SetPath(const QString &s){
+    folderPath = s;    // копирование
+    pathList.clear();
+
+}
 
 
 /*
@@ -226,11 +249,9 @@ return 0;
 
 * Вывоится всё содержимое (в том числе ярлыки, но рекурсия не углубляется по адресам ярлыков)
 * Список заполняется в соответствии с выводом, КРОМЕ ярлыков (все ярлыки игнорируются)
+*       Системные пути и файлы также отслеживаются и генерируется исключение при их обнаружении
 */
 
 
 
-// setter нового пути к папке
-void FolderTraveler::SetPath(const QString &s){
-    Folder_Path = s;    // копирование
-}
+

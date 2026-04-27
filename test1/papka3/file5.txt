@@ -1,0 +1,4 @@
+file5.txt
+fuel
+19 roses
+Text has been ended with a point.

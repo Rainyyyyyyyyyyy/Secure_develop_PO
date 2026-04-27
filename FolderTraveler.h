@@ -1,26 +1,19 @@
 #ifndef FOLDERTRAVELER_H
 #define FOLDERTRAVELER_H
 
-#endif // FOLDERTRAVELER_H
 
-#include <QTextStream>
-#include <QDir>
 
 #include "FolderTravelerExceptions.h"
+
+#include <QVector>
+#include <QString>
 
 
 
 class FolderTraveler{
 private:
-    // список путей ко всем файлам внутри папки Folder_Path
-    QVector <QString> File_Path_List;
-    // путь к обозреваемой папке
-    QString Folder_Path;
-
-
-    static QTextStream input; //(stdin);
-    static QTextStream output; //(stdout);
-
+    QVector <QString> pathList;     // список путей ко всем файлам внутри папки Folder_Path
+    QString folderPath;     // путь к обозреваемой папке
 
     void listContents(const QString &path, int indent = 0);
 
@@ -57,5 +50,8 @@ public:
     // очистить список
     void clear();
 };
+
+
+#endif // FOLDERTRAVELER_H
 
 
