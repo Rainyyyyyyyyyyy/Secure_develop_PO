@@ -150,9 +150,15 @@ void FolderTraveler::listContents(const QString &path, int indent) {
         } else {
             // добавление файла в список файлов
             // с проверкой на ярлык.lnk и системные атрибуты
-            if(entry.suffix().toLower() != "lnk" && !isSystemEntry(entry)){
-                pathList.push_back(entry.absoluteFilePath());
+            try{
+                if(isSystemEntry(entry)) throw ExceptionPathFromSystemEntries();
+                    if(entry.suffix().toLower() != "lnk"){
+                        pathList.push_back(entry.absoluteFilePath());
+                    }
+            }catch (ExceptionPathFromSystemEntries &excp){
+                    qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
             }
+
             // Выводим файл с информацией о размере
             QString sizeStr;    // для вывода
             qint64 size = entry.size();
