@@ -28,8 +28,8 @@ private:
     bool IsFileEncrypted(const QString &filePath);
 
 
-    bool Encrypt_File(const QString &filePath, const QString &password);
-    bool Decrypt_File(const QString &filePath, const QString &password);
+    bool Encrypt_File(const QString &filePath, const QString &password) override;
+    bool Decrypt_File(const QString &filePath, const QString &password) override;
 // =    =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =
 
 
@@ -48,9 +48,9 @@ public:
     }
 
     // зашифровать папку
-    bool Encrypt_Folder(const QString &folderPath, const QString &password);
+    bool Encrypt_Folder(const QString &folderPath, const QString &password) override;
     // дешифровать папку
-    bool Decrypt_Folder(const QString &folderPath, const QString &password);
+    bool Decrypt_Folder(const QString &folderPath, const QString &password) override;
 
 
 };
