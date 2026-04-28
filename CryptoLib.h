@@ -28,8 +28,6 @@ private:
     bool IsFileEncrypted(const QString &filePath);
 
 
-
-
     bool Encrypt_File(const QString &filePath, const QString &password);
     bool Decrypt_File(const QString &filePath, const QString &password);
 // =    =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =   =

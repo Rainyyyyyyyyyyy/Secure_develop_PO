@@ -172,9 +172,13 @@ bool CryptoActionsAES::Encrypt_Folder(const QString &folderPath, const QString &
     listContents(folderPath, Paths_to_files);
 
 
-    for(auto temp_path : Paths_to_files){
-            qDebug()<<temp_path;
-            Encrypt_File(temp_path, password);
+    for(int i=0; i<Paths_to_files.size(); i++){
+            qDebug()<<Paths_to_files[i];
+            try{
+                Encrypt_File(Paths_to_files[i], password);
+            }catch(CustomExceptions &excp){
+                 qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
+            }
     }
 }
 // дешифровать папку
@@ -183,9 +187,13 @@ bool CryptoActionsAES::Decrypt_Folder(const QString &folderPath, const QString &
     listContents(folderPath, Paths_to_files);
 
 
-    for(auto temp_path : Paths_to_files){
-            qDebug()<<temp_path;
-            Decrypt_File(temp_path, password);
+    for(int i=0; i<Paths_to_files.size(); i++){
+            qDebug()<<Paths_to_files[i];
+            try{
+                Decrypt_File(Paths_to_files[i], password);
+            }catch(CustomExceptions &excp){
+                 qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
+            }
     }
 }
 
