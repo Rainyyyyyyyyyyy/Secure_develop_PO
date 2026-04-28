@@ -8,7 +8,6 @@
 class InterfaceCryptoActions {
 private:
 
-public:
 
     // функция шифрования для файла (по паролю)
     virtual bool Encrypt_File(const QString &filePath, const QString &password) = 0;
@@ -20,6 +19,11 @@ public:
     // функция дешифрования для файла (по готовому хешу из пароля)
     //virtual bool DecryptFile(const QString &filePath, const QByteArray &hash) = 0;
 
+public:
+
+    virtual bool Encrypt_Folder(const QString &folderPath, const QString &password) = 0;
+
+    virtual bool Decrypt_Folder(const QString &folderPath, const QString &password) = 0;
 
     virtual ~InterfaceCryptoActions() = default;
 };
