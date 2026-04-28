@@ -12,58 +12,7 @@
 #include <QDebug>
 #include <QDir>
 
-// анонимное namespace известное этому и только этому файлу (FolderTraveler.cpp)
-namespace {
-/*
- * Windows:
- *      системный файл ((GetFileAttributes() & FILE_ATTRIBUTE_SYSTEM) == true) -> return true
- *      несистемный файл ((GetFileAttributes() & FILE_ATTRIBUTE_SYSTEM) == false) -> return false
- * Unix:
- *      файл в одной из подсистемных папок:
- *      /proc
- *      /sys
- *      /dev
- *      /run
- *      либо содержит в полном пути эти папки -> return true
- *      файл вне подсистемных папок:
- *       /proc
- *      /sys
- *      /dev
- *      /run
- *      и не содержит в полном пути этих папок -> return false
-*/
-bool isSystemEntry(const QFileInfo &entry){
-    #ifdef Q_OS_WIN
-        const std::wstring path = entry.absoluteFilePath().toStdWString();
-        const DWORD attrs = GetFileAttributesW(path.c_str());
-        if (attrs == INVALID_FILE_ATTRIBUTES) {
-            return false;
-        }
-        return (attrs & FILE_ATTRIBUTE_SYSTEM) != 0;
-    #elif defined(Q_OS_UNIX)
-        const QString p = entry.absoluteFilePath();
-        if (p == "/proc" || p == "/sys" || p == "/dev" || p == "/run" ||
-            p.startsWith("/proc/") || p.startsWith("/sys/") ||
-            p.startsWith("/dev/") || p.startsWith("/run/")) {
-            return true;
-        }
 
-        struct stat st {};
-        const QByteArray nativePath = p.toLocal8Bit();
-        if (::stat(nativePath.constData(), &st) != 0) {
-            return false;
-        }
-
-        // Не добавляем специальные узлы ФС (device/fifo/socket).
-        return S_ISCHR(st.st_mode) || S_ISBLK(st.st_mode) ||
-           S_ISFIFO(st.st_mode) || S_ISSOCK(st.st_mode);
-    #else
-        Q_UNUSED(entry);
-        return false;
-    #endif
-}
-
-}
 
 
 //QTextStream FolderTraveler::output = QTextStream(stdout);
