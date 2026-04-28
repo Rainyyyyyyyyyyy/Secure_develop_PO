@@ -6,7 +6,6 @@
 #include <vector>
 #include <QVector>
 
-#include "FolderTraveler.h"
 #include "CryptoLib.h"          // includes CryptoLibExceptions.h and openssl
 
 #include <iostream>
@@ -43,13 +42,13 @@ int main(int argc, char *argv[]) {
 
 
     QString folderPath;
-    FolderTraveler Folderr;
+    //FolderTraveler Folderr;
     QString current_UI_action = ".reset";
 
     qDebug()<<"\n\n==========================\nEnter '.exit' on any stage to exit from program.\n=========================="<<Qt::endl;
     // запрос пути к папке
     do{
-        Folderr.clear();
+        //Folderr.clear();
         try {
             qDebug()<<"Enter path to directory: "<<Qt::flush;
             folderPath = input.readLine();
@@ -69,7 +68,7 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-        try{
+        /*try{
             Folderr.SetPath(folderPath);
             output << "\nContent of  " << folderPath << ":\n";
             output << "====================================\n";
@@ -83,7 +82,7 @@ int main(int argc, char *argv[]) {
         }
 
         Folderr.OutputList();
-
+    */
         qDebug()<<"Enter action ('.reset', or skip)"<<Qt::endl;
         current_UI_action = input.readLine();
         if(current_UI_action == ".exit"){
@@ -93,7 +92,7 @@ int main(int argc, char *argv[]) {
 
 
 
-    QVector <QString> Folder_entries_list = Folderr.Entries();
+    //QVector <QString> Folder_entries_list = Folderr.Entries();
     CryptoActionsAES &cry = CryptoActionsAES::Instance();
     QString mode;
     QString MODES[] = {".encrypt", ".decrypt" };
@@ -124,26 +123,27 @@ int main(int argc, char *argv[]) {
     }while(current_UI_action == ".reset");
 
     if(mode == ".encrypt"){
-        for(int i=0; i<Folder_entries_list.size(); i++){
-            qDebug()<<Folder_entries_list[i];
+        //for(int i=0; i<Folder_entries_list.size(); i++){
+        //    qDebug()<<Folder_entries_list[i];
             try
             {
-                cry.Encrypt_File(Folder_entries_list[i], Password); //(Path_to_encrypt_file, Password_to_encrypt);
+                //cry.Encrypt_File(Folder_entries_list[i], Password); //(Path_to_encrypt_file, Password_to_encrypt);
+            cry.Encrypt_Folder(folderPath, Password);
             } catch(const CustomExceptions &excp){
                 qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
             }
         }
-    }else if(mode == ".decrypt"){
-        for(int i=0; i<Folder_entries_list.size(); i++){
-            qDebug()<<Folder_entries_list[i];
+        else if(mode == ".decrypt"){
+        //for(int i=0; i<Folder_entries_list.size(); i++){
+            //qDebug()<<Folder_entries_list[i];
             try
             {
-                cry.Decrypt_File(Folder_entries_list[i], Password); //(Path_to_encrypt_file, Password_to_encrypt);
+                //cry.Decrypt_File(Folder_entries_list[i], Password); //(Path_to_encrypt_file, Password_to_encrypt);
+                cry.Decrypt_Folder(folderPath, Password);
             } catch(const CustomExceptions &excp){
                 qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
             }
         }
-    }
 
 
     return 0;

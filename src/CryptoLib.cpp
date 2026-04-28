@@ -1,15 +1,72 @@
 #include "CryptoLib.h"
-#include "CryptoLibExceptions.h"
+//#include "CryptoLibExceptions.h"
 
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
 #include <QByteArray>
 #include <QCryptographicHash>
+#include <QDir>
 
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #include <openssl/err.h>
+
+// анонимное namespace известное этому и только этому файлу (FolderTraveler.cpp)
+namespace {
+/*
+ * Windows:
+ *      системный файл ((GetFileAttributes() & FILE_ATTRIBUTE_SYSTEM) == true) -> return true
+ *      несистемный файл ((GetFileAttributes() & FILE_ATTRIBUTE_SYSTEM) == false) -> return false
+ * Unix:
+ *      файл в одной из подсистемных папок:
+ *      /proc
+ *      /sys
+ *      /dev
+ *      /run
+ *      либо содержит в полном пути эти папки -> return true
+ *      файл вне подсистемных папок:
+ *       /proc
+ *      /sys
+ *      /dev
+ *      /run
+ *      и не содержит в полном пути этих папок -> return false
+*/
+bool isSystemEntry(const QFileInfo &entry){
+#ifdef Q_OS_WIN
+    const std::wstring path = entry.absoluteFilePath().toStdWString();
+    const DWORD attrs = GetFileAttributesW(path.c_str());
+    if (attrs == INVALID_FILE_ATTRIBUTES) {
+        return false;
+    }
+    return (attrs & FILE_ATTRIBUTE_SYSTEM) != 0;
+#elif defined(Q_OS_UNIX)
+    const QString p = entry.absoluteFilePath();
+    if (p == "/proc" || p == "/sys" || p == "/dev" || p == "/run" ||
+        p.startsWith("/proc/") || p.startsWith("/sys/") ||
+        p.startsWith("/dev/") || p.startsWith("/run/")) {
+        return true;
+    }
+
+    struct stat st {};
+    const QByteArray nativePath = p.toLocal8Bit();
+    if (::stat(nativePath.constData(), &st) != 0) {
+        return false;
+    }
+
+    // Не добавляем специальные узлы ФС (device/fifo/socket).
+    return S_ISCHR(st.st_mode) || S_ISBLK(st.st_mode) ||
+           S_ISFIFO(st.st_mode) || S_ISSOCK(st.st_mode);
+#else
+    Q_UNUSED(entry);
+    return false;
+#endif
+}
+
+}
+
+
+
 
 // анонимное namespace известное только и только этому файлу - файлу CryptoLib.cpp
 namespace {
@@ -36,7 +93,111 @@ namespace {
     return derived;
     }
 
+
+
+    void listContents(QString path, QVector <QString> &pathList) {
+    QDir dir(path);
+
+    // Проверяем, существует ли папка
+    if (!dir.exists()) {
+            throw ExceptionFolderNotFould();
+    }
+
+    // Получаем список всех файлов и папок (включая скрытые)
+    QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
+
+    // Отступ для визуального отображения вложенности
+    //QString indentStr(indent * 2, ' ');
+
+    // цикл по содержимому
+    for (const QFileInfo &entry : entries) {
+            // если папка
+            if (entry.isDir()) {
+                // проверка на то, что эта папка - на самом деле ярлык на папку
+                // если так, то игнорировать её
+                if(entry.suffix().toLower() != "lnk"){
+                    // Выводим папку
+                    /////qDebug() << indentStr + "[Folder]" + entry.fileName();
+
+                    // Рекурсивно обходим содержимое папки
+                    listContents(entry.absoluteFilePath(), pathList); //indent + 1);
+                }else{
+                    // Выводим ярлык на папку
+                    /////qDebug() << indentStr + "[Folder.lnk]" + entry.fileName();
+
+                    // и НЕ продолжаем рекурсию
+                }
+            } else {
+                // добавление файла в список файлов
+                // с проверкой на ярлык.lnk и системные атрибуты
+                try{
+                    if(isSystemEntry(entry)) throw ExceptionPathFromSystemEntries();
+                    if(entry.suffix().toLower() != "lnk"){
+                        pathList.push_back(entry.absoluteFilePath());
+                    }
+                }catch (ExceptionPathFromSystemEntries &excp){
+                    qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
+                }
+
+                // Выводим файл с информацией о размере
+                QString sizeStr;    // для вывода
+                qint64 size = entry.size();
+
+                if (size < 1024) {
+                    sizeStr = QString::number(size) + " B";
+                } else if (size < 1024 * 1024) {
+                    sizeStr = QString::number(size / 1024.0, 'f', 2) + " KB";
+                } else if (size < 1024 * 1024 * 1024) {
+                    sizeStr = QString::number(size / (1024.0 * 1024.0), 'f', 2) + " MB";
+                } else {
+                    sizeStr = QString::number(size / (1024.0 * 1024.0 * 1024.0), 'f', 2) + " GB";
+                }
+                //if(entry.suffix().toLower() != "lnk")
+                //qDebug() << indentStr + "[File]" + entry.fileName() + " (" + sizeStr + ")";
+                //else qDebug() << indentStr + "[File.lnk]" + entry.fileName() + " (" + sizeStr + ")";
+            }
+    }
+    if(pathList.size() == 0){
+            throw ExceptionFolderIsEmpty();
+    }
 }
+}
+
+
+
+
+// зашифровать папку
+bool CryptoActionsAES::Encrypt_Folder(const QString &folderPath, const QString &password){
+    QVector <QString> Paths_to_files;
+    listContents(folderPath, Paths_to_files);
+
+
+    for(int i=0; i<Paths_to_files.size(); i++){
+            qDebug()<<Paths_to_files[i];
+            try{
+                Encrypt_File(Paths_to_files[i], password);
+            }catch(CustomExceptions &excp){
+                 qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
+            }
+    }
+}
+// дешифровать папку
+bool CryptoActionsAES::Decrypt_Folder(const QString &folderPath, const QString &password){
+    QVector <QString> Paths_to_files;
+    listContents(folderPath, Paths_to_files);
+
+
+    for(int i=0; i<Paths_to_files.size(); i++){
+            qDebug()<<Paths_to_files[i];
+            try{
+                Decrypt_File(Paths_to_files[i], password);
+            }catch(CustomExceptions &excp){
+                 qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
+            }
+    }
+}
+
+
 
 
 
