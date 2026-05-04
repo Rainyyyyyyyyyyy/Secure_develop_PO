@@ -1,5 +1,4 @@
 #include "CryptoLib.h"
-//#include "CryptoLibExceptions.h"
 
 #include <QDebug>
 #include <QFile>
@@ -96,6 +95,15 @@ namespace {
 
 
     void listContents(QString path, QVector <QString> &pathList) {
+    if(path[0] == 'C' || path[0] == 'c'){
+            qDebug()<<"Warning: folder from disk C!"; //throw ExceptionFolderFromDiskC();
+    }
+    if(path == ""){
+            throw ExceptionFolderNotFould();
+    }
+    if(path.contains("..") || path.contains(".")){
+            throw ExceptionDotOrDotDot();
+    }
     QDir dir(path);
 
     // Проверяем, существует ли папка
@@ -107,7 +115,7 @@ namespace {
     QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
 
     // Отступ для визуального отображения вложенности
-    //QString indentStr(indent * 2, ' ');
+    ///////QString indentStr(indent * 2, ' ');
 
     // цикл по содержимому
     for (const QFileInfo &entry : entries) {
@@ -152,9 +160,9 @@ namespace {
                 } else {
                     sizeStr = QString::number(size / (1024.0 * 1024.0 * 1024.0), 'f', 2) + " GB";
                 }
-                //if(entry.suffix().toLower() != "lnk")
-                //qDebug() << indentStr + "[File]" + entry.fileName() + " (" + sizeStr + ")";
-                //else qDebug() << indentStr + "[File.lnk]" + entry.fileName() + " (" + sizeStr + ")";
+                ///////if(entry.suffix().toLower() != "lnk")
+                ///////qDebug() << indentStr + "[File]" + entry.fileName() + " (" + sizeStr + ")";
+                ///////else qDebug() << indentStr + "[File.lnk]" + entry.fileName() + " (" + sizeStr + ")";
             }
     }
     if(pathList.size() == 0){
@@ -169,8 +177,13 @@ namespace {
 // зашифровать папку
 bool CryptoActionsAES::Encrypt_Folder(const QString &folderPath, const QString &password){
     QVector <QString> Paths_to_files;
-    listContents(folderPath, Paths_to_files);
-
+    try{
+        listContents(folderPath, Paths_to_files);
+    }
+    catch(CustomExceptions &excp){
+        qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
+        return false;
+    }
 
     for(int i=0; i<Paths_to_files.size(); i++){
             qDebug()<<Paths_to_files[i];
@@ -180,7 +193,9 @@ bool CryptoActionsAES::Encrypt_Folder(const QString &folderPath, const QString &
                  qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
             }
     }
+    return true;
 }
+
 // дешифровать папку
 bool CryptoActionsAES::Decrypt_Folder(const QString &folderPath, const QString &password){
     QVector <QString> Paths_to_files;
@@ -213,11 +228,6 @@ bool CryptoActionsAES::IsFileEncrypted(const QString &filePath)
             throw ExceptionUnableToOpenFile();
     }
 
-    /*if(file.size() == 0){
-            file.close();
-            throw ExceptionFileIsEmpty();
-    }
-    */
     // Проверяем, достаточно ли размера для сигнатуры
     if (file.size() < SIGN_LEN) {
         file.close();
@@ -229,7 +239,6 @@ bool CryptoActionsAES::IsFileEncrypted(const QString &filePath)
     if (file.read(magic, SIGN_LEN) != SIGN_LEN) {
         file.close();
          throw ExceptionUnableToReadSign();
-        //return false;
     }
 
     file.close();
@@ -269,10 +278,6 @@ bool CryptoActionsAES::Encrypt_File(const QString &filePath, const QString &pass
     QByteArray plainData = inputFile.readAll();
     inputFile.close();
 
-    /*if (plainData.isEmpty()) {
-        //throw new ExceptionEmptyFile;
-        qDebug()<<"Warning: Empty file: "<<filePath<<Qt::flush;
-    }*/
 
     // 4. Генерируем случайную соль
     unsigned char salt[SALT_LEN];
@@ -461,8 +466,6 @@ bool CryptoActionsAES::Decrypt_File(const QString &filePath, const QString &pass
 
     outputFile.close();
 
-    //output << "Decrypted: " << filePath << " -> " << outputFilePath << "\n";
-    //output << "  Size: " << plainData.size() << " bytes\n";
 
     return true;
 }

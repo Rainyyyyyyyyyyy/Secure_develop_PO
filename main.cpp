@@ -1,7 +1,6 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QDebug>
-//#include <QTextStream>
 #include <windows.h>
 #include <vector>
 #include <QVector>
@@ -15,19 +14,6 @@ QTextStream output(stdout);
 
 
 
-bool checkMODE(const QString *modes, int size, const QString &s){
-    for(int i=0; i<size; i++){
-        if(s == modes[i])return true;
-    }
-    return false;
-}
-
-bool checkACTiON(const QString *actions, int size, const QString &s){
-    for(int i=0; i<size; i++){
-        if(s == actions[i])return true;
-    }
-    return false;
-}
 int main(int argc, char *argv[]) {
 
 
@@ -42,47 +28,14 @@ int main(int argc, char *argv[]) {
 
 
     QString folderPath;
-    //FolderTraveler Folderr;
     QString current_UI_action = ".reset";
 
     qDebug()<<"\n\n==========================\nEnter '.exit' on any stage to exit from program.\n=========================="<<Qt::endl;
     // запрос пути к папке
     do{
-        //Folderr.clear();
-        try {
-            qDebug()<<"Enter path to directory: "<<Qt::flush;
-            folderPath = input.readLine();
-            if(folderPath[0] == 'C' || folderPath[0] == 'c'){
-                folderPath = "";
-                throw ExceptionFolderFromDiskC();
-            }
-            if(folderPath == ""){
-                throw ExceptionFolderNotFould();
-            }
-            if(folderPath.contains("..") || folderPath.contains(".")){
-                throw ExceptionDotOrDotDot();
-            }
-        }
-        catch (const CustomExceptions &excp){
-            qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
-            continue;
-        }
+        qDebug()<<"Enter path to directory: "<<Qt::flush;
+        folderPath = input.readLine();
 
-        /*try{
-            Folderr.SetPath(folderPath);
-            output << "\nContent of  " << folderPath << ":\n";
-            output << "====================================\n";
-            output.flush();
-            Folderr.TravelFolder();
-        }
-        catch (const CustomExceptions &excp){
-            qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
-            Folderr.clear();
-            continue;
-        }
-
-        Folderr.OutputList();
-    */
         qDebug()<<"Enter action ('.reset', or skip)"<<Qt::endl;
         current_UI_action = input.readLine();
         if(current_UI_action == ".exit"){
@@ -91,8 +44,6 @@ int main(int argc, char *argv[]) {
     }while(current_UI_action == ".reset");
 
 
-
-    //QVector <QString> Folder_entries_list = Folderr.Entries();
     CryptoActionsAES &cry = CryptoActionsAES::Instance();
     QString mode;
     QString MODES[] = {".encrypt", ".decrypt" };
@@ -105,7 +56,7 @@ int main(int argc, char *argv[]) {
         if(mode == ".exit"){
             return 0;
         }
-    }while(mode != ".encrypt" && mode != ".decrypt"); //checkMODE(MODES, 2, mode) == false);
+    }while(mode != ".encrypt" && mode != ".decrypt");
 
     // запрос пароля
     current_UI_action = ".reset";
@@ -123,22 +74,16 @@ int main(int argc, char *argv[]) {
     }while(current_UI_action == ".reset");
 
     if(mode == ".encrypt"){
-        //for(int i=0; i<Folder_entries_list.size(); i++){
-        //    qDebug()<<Folder_entries_list[i];
             try
             {
-                //cry.Encrypt_File(Folder_entries_list[i], Password); //(Path_to_encrypt_file, Password_to_encrypt);
             cry.Encrypt_Folder(folderPath, Password);
             } catch(const CustomExceptions &excp){
                 qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
             }
         }
         else if(mode == ".decrypt"){
-        //for(int i=0; i<Folder_entries_list.size(); i++){
-            //qDebug()<<Folder_entries_list[i];
             try
             {
-                //cry.Decrypt_File(Folder_entries_list[i], Password); //(Path_to_encrypt_file, Password_to_encrypt);
                 cry.Decrypt_Folder(folderPath, Password);
             } catch(const CustomExceptions &excp){
                 qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
@@ -148,10 +93,9 @@ int main(int argc, char *argv[]) {
 
     return 0;
 
-    // tests: E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Files_tests\emptytext.txt
-    //          E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Files_tests\plaintext.txt
-    //          E:\Z_vsyakoe_dla_echeby\4k2sem\SEcure_Develop_PO(Andreeva)\laba1_test_files\Encrypt_Folder_tests\test1
-    // password: "password"
+    //      test:
+    //          Disk:\path\to\files\test1
+    //          password: "password"
 
 }
 
