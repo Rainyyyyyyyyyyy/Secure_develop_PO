@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
     // запрос пароля
     current_UI_action = ".reset";
     do{
-        qDebug()<<"Enter password: ";
+        qDebug()<<"Enter password (8-32 characters): ";
         Password = input.readLine();
         Password.detach();
 
