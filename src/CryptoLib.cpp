@@ -178,6 +178,9 @@ namespace {
 bool CryptoActionsAES::Encrypt_Folder(const QString &folderPath, const QString &password){
     QVector <QString> Paths_to_files;
     try{
+        if(password.size() < 8 || password.size() > 32){
+            throw ExceptionLenPasswordIsOutOfBounds();
+        }
         listContents(folderPath, Paths_to_files);
     }
     catch(CustomExceptions &excp){
