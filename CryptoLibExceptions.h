@@ -31,6 +31,7 @@
 #define EXCEPTION_FILE_IS_ALREADY_ENCRYPTED 3002    // файл уже зашифрован
 #define EXCEPTION_FILE_IS_ALREADY_DECRYPTED 3003    // файл уже дешифрован
 #define EXCEPTION_INCORRECT_PASSWORD 3004       // введён неверный пароль ( для дешифрования )
+#define EXCEPTION_LEN_PASSWORD_OUT_OF_BOUNDS 3005 // пароль слишком короткий или слишком длинный
 
 #define EXCEPTION_FOLDER_NOT_FOULD 10001
 #define EXCEPTION_FOLDER_FROM_DISK_C 10002
@@ -209,6 +210,12 @@ public:
 class ExceptionIncorrectPassword : public CustomExceptions {
 public:
     ExceptionIncorrectPassword() : CustomExceptions(EXCEPTION_INCORRECT_PASSWORD, "Incorrect password!") {}
+};
+
+/* исключение: длина пароля слишком мала или слишком велика */
+class ExceptionLenPasswordIsOutOfBounds : public CustomExceptions {
+public:
+    ExceptionLenPasswordIsOutOfBounds() : CustomExceptions(EXCEPTION_LEN_PASSWORD_OUT_OF_BOUNDS, "Lenght of password is out of bounds!") {}
 };
 
 /* Исключение: файл пуст */
