@@ -33,16 +33,16 @@
 #define EXCEPTION_INCORRECT_PASSWORD 3004       // введён неверный пароль ( для дешифрования )
 #define EXCEPTION_LEN_PASSWORD_OUT_OF_BOUNDS 3005 // пароль слишком короткий или слишком длинный
 
-#define EXCEPTION_FOLDER_NOT_FOULD 10001
+#define EXCEPTION_FOLDER_NOT_FOUND 10001
 #define EXCEPTION_FOLDER_FROM_DISK_C 10002
 #define EXCEPTION_FOLDER_IS_EMPTY 10003
 #define EXCEPTION_PATH_FROM_SYSTEM_ENTRIES 10005
 
 
 /* Исключение: папка не найдена */
-class ExceptionFolderNotFould : public CustomExceptions {
+class ExceptionFolderNotFound : public CustomExceptions {
 public:
-    ExceptionFolderNotFould() : CustomExceptions(EXCEPTION_FOLDER_NOT_FOULD, "Error: folder not found!"){}
+    ExceptionFolderNotFound() : CustomExceptions(EXCEPTION_FOLDER_NOT_FOUND, "Error: folder not found!"){}
 };
 
 /* Исключение: папка из диска С */
