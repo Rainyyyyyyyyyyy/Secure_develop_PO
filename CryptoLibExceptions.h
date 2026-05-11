@@ -221,6 +221,6 @@ public:
 /* Исключение: попытка зашифровки\дешифровки пути с приложением */
 class ExceptionTryToSelfCrypting : public CustomExceptions {
 public:
-    ExceptionTryToSelfCrypting() : CustomExceptions(EXCPETION_TRY_TO_SELFCRYPTING, "Warning: trying to enter path with application!") {}
+    ExceptionTryToSelfCrypting() : CustomExceptions(EXCPETION_TRY_TO_SELFCRYPTING, "Warning: trying to enter path with an application!") {}
 };
 

@@ -95,27 +95,21 @@ namespace {
 
     // проверка на "самошифрование"
     bool checkSelfCrypt(QString path){
-    QString selfdir = QCoreApplication::applicationDirPath();
-    QDir got_dir_path(path);
+        QString selfdir = QCoreApplication::applicationDirPath();
+        QDir got_dir_path(path);
 
-    return selfdir.contains(got_dir_path.absolutePath());
+        return selfdir.contains(got_dir_path.absolutePath());
     }
 
 
     void listContents(QString path, QVector <QString> &pathList) {
     //qDebug()<<path;
-    if(path.isEmpty()){
-            throw ExceptionFolderNotFound();
-    }
-    if(path[0] == 'C' || path[0] == 'c'){
-            qDebug()<<"Warning: folder from disk C!"; //throw ExceptionFolderFromDiskC();
-    }
+    if(path.isEmpty())throw ExceptionFolderNotFound();
+    if(path[0] == 'C' || path[0] == 'c')throw ExceptionFolderFromDiskC();
     QDir dir(path);
     // Проверяем, существует ли папка
-    if (!dir.exists()) {
-            throw ExceptionFolderNotFound();
-    }
-
+    if (!dir.exists())throw ExceptionFolderNotFound();
+    if(checkSelfCrypt(dir.absolutePath()))throw ExceptionTryToSelfCrypting();
 
 
     // Получаем список всех файлов и папок (включая скрытые)
