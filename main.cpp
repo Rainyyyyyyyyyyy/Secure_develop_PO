@@ -20,7 +20,7 @@ void exitMessage(){
 
 
 int main(int argc, char *argv[]) {
-
+    QCoreApplication qcoreappa(argc, argv);
     /* === P0 === */
     /* testcase 0.1 */ /*
     CryptoActionsAES &crypto_test =  CryptoActionsAES::Instance();
@@ -167,7 +167,7 @@ int main(int argc, char *argv[]) {
     SetConsoleOutputCP(12051);
 
 
-    QCoreApplication qcoreappa(argc, argv); // для вывода текущей директории, отн-но которой ориентируется программа
+     // для вывода текущей директории, отн-но которой ориентируется программа
     qDebug()<<"Current relative path: "<<QCoreApplication::applicationDirPath()<<Qt::endl;
 
     QString folderPath;
