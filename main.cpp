@@ -21,6 +21,40 @@ void exitMessage(){
 
 int main(int argc, char *argv[]) {
 
+    /* === P0 === */
+    /* testcase 0.1 */ /*
+    CryptoActionsAES &crypto_test =  CryptoActionsAES::Instance();
+    //QString password_test = "123456789012345678901234567890123";
+    //QString password_test = "123";
+    QString password_test = "1234567890";
+    QString path_test = "../Tests/P1/1";
+    crypto_test.Encrypt_Folder(path_test, password_test);
+    */
+    /* testcase 0.2 */ /*
+    CryptoActionsAES &crypto_test =  CryptoActionsAES::Instance();
+    QString password_test = "password";
+    QString path_test = "../Tests/P0/0.2/file.txt";
+    crypto_test.Encrypt_Folder(path_test, password_test);
+    */
+    /* testcase 0.3 */ /*
+    CryptoActionsAES &crypto_test =  CryptoActionsAES::Instance();
+    QString password_test = "password";
+    QString path_test = "../Tests/P0/0.3";
+    crypto_test.Encrypt_Folder(path_test, password_test);
+    */
+    /* testcase 0.4 */ /*
+    CryptoActionsAES &crypto_test =  CryptoActionsAES::Instance();
+    QString password_test = "password";
+    QString path_test;
+    crypto_test.Encrypt_Folder(path_test, password_test);
+    */
+    /* testcase 0.5 */ /*
+    CryptoActionsAES &crypto_test =  CryptoActionsAES::Instance();
+    QString password_test = "password";
+    QString path_test = "..";
+    crypto_test.Encrypt_Folder(path_test, password_test);
+    */
+
     /* === P1 === */
     /* testcase 1 */ /*
     CryptoActionsAES &crypto_test =  CryptoActionsAES::Instance();
