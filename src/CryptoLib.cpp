@@ -95,23 +95,24 @@ namespace {
 
 
     void listContents(QString path, QVector <QString> &pathList) {
+    qDebug()<<path;
     if(path[0] == 'C' || path[0] == 'c'){
             qDebug()<<"Warning: folder from disk C!"; //throw ExceptionFolderFromDiskC();
     }
     if(path == ""){
-            throw ExceptionFolderNotFould();
+            throw ExceptionFolderNotFound();
     }
     QDir dir(path);
 
     // Проверяем, существует ли папка
     if (!dir.exists()) {
-            throw ExceptionFolderNotFould();
+            throw ExceptionFolderNotFound();
     }
 
     // Получаем список всех файлов и папок (включая скрытые)
     QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
 
-
+    if(entries.size()==0)return;
 
     // цикл по содержимому
     for (const QFileInfo &entry : entries) {
@@ -154,9 +155,6 @@ namespace {
                 }
             }
     }
-    if(pathList.size() == 0){
-            throw ExceptionFolderIsEmpty();
-    }
 }
 }
 
@@ -174,7 +172,7 @@ bool CryptoActionsAES::Encrypt_Folder(const QString &folderPath, const QString &
     }
     catch(CustomExceptions &excp){
         qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
-        return false;
+        //return false;
     }
 
     for(int i=0; i<Paths_to_files.size(); i++){
@@ -191,7 +189,16 @@ bool CryptoActionsAES::Encrypt_Folder(const QString &folderPath, const QString &
 // дешифровать папку
 bool CryptoActionsAES::Decrypt_Folder(const QString &folderPath, const QString &password){
     QVector <QString> Paths_to_files;
-    listContents(folderPath, Paths_to_files);
+    try{
+            if(password.size() < 8 || password.size() > 32){
+                 throw ExceptionLenPasswordIsOutOfBounds();
+            }
+            listContents(folderPath, Paths_to_files);
+    }
+    catch(CustomExceptions &excp){
+            qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
+            //return false;
+    }
 
 
     for(int i=0; i<Paths_to_files.size(); i++){
