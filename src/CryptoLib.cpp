@@ -1,5 +1,6 @@
 #include "CryptoLib.h"
 
+#include <QCoreApplication>
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
@@ -92,27 +93,35 @@ namespace {
     return derived;
     }
 
+    // проверка на "самошифрование"
+    bool checkSelfCrypt(QString path){
+    QString selfdir = QCoreApplication::applicationDirPath();
+    QDir got_dir_path(path);
+
+    return selfdir.contains(got_dir_path.absolutePath());
+    }
 
 
     void listContents(QString path, QVector <QString> &pathList) {
-    qDebug()<<path;
+    //qDebug()<<path;
+    if(path.isEmpty()){
+            throw ExceptionFolderNotFound();
+    }
     if(path[0] == 'C' || path[0] == 'c'){
             qDebug()<<"Warning: folder from disk C!"; //throw ExceptionFolderFromDiskC();
     }
-    if(path == ""){
-            throw ExceptionFolderNotFound();
-    }
     QDir dir(path);
-
     // Проверяем, существует ли папка
     if (!dir.exists()) {
             throw ExceptionFolderNotFound();
     }
 
+
+
     // Получаем список всех файлов и папок (включая скрытые)
     QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
 
-    if(entries.size()==0)return;
+    if(entries.size()==0)throw ExceptionFolderIsEmpty();
 
     // цикл по содержимому
     for (const QFileInfo &entry : entries) {

@@ -10,7 +10,7 @@ protected:
     std::string message;    // описание
 
 public:
-    CustomExceptions(unsigned int code__, const char * message__) : errorCode(code__), message(message__) {};
+    CustomExceptions(unsigned int code__=1, const char * message__="Unexpected error.") : errorCode(code__), message(message__) {};
 
     const char *what() const noexcept override{ return message.c_str(); }
 

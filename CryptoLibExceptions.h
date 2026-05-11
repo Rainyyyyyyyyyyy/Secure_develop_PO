@@ -37,7 +37,7 @@
 #define EXCEPTION_FOLDER_FROM_DISK_C 10002
 #define EXCEPTION_FOLDER_IS_EMPTY 10003
 #define EXCEPTION_PATH_FROM_SYSTEM_ENTRIES 10005
-
+#define EXCPETION_TRY_TO_SELFCRYPTING 10006
 
 /* Исключение: папка не найдена */
 class ExceptionFolderNotFound : public CustomExceptions {
@@ -216,5 +216,11 @@ public:
 class ExceptionFileIsEmpty : public CustomExceptions {
 public:
     ExceptionFileIsEmpty() : CustomExceptions(EXCEPTION_FILE_IS_EMPTY, "Warning: file is empty!") {}
+};
+
+/* Исключение: попытка зашифровки\дешифровки пути с приложением */
+class ExceptionTryToSelfCrypting : public CustomExceptions {
+public:
+    ExceptionTryToSelfCrypting() : CustomExceptions(EXCPETION_TRY_TO_SELFCRYPTING, "Warning: trying to enter path with application!") {}
 };
 
