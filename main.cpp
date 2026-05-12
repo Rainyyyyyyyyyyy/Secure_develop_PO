@@ -158,6 +158,16 @@ int main(int argc, char *argv[]) {
     QString path_test = "../Tests/P7/16";
     crypto_test.Encrypt_Folder(path_test, password_test);
     */
+
+    /* === P9 === */
+    /* testcase 16 */
+    CryptoActionsAES &crypto_test =  CryptoActionsAES::Instance();
+    QString password_test = "password";
+    QString path_test = "../Tests/P9";
+    crypto_test.Decrypt_Folder(path_test, password_test);
+
+    return 0;
+
     // вывод версии openssl
     output<<OPENSSL_VERSION_TEXT<<'\n';
     output.flush();
@@ -240,7 +250,7 @@ int main(int argc, char *argv[]) {
     return 0;
 
 
-}
+      }
 
 
 
