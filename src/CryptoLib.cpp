@@ -104,21 +104,21 @@ namespace {
 
     void listContents(QString path, QVector <QString> &pathList) {
     //qDebug()<<path;
-    if(path.isEmpty())throw ExceptionFolderNotFound();
-    if(path[0] == 'C' || path[0] == 'c')throw ExceptionFolderFromDiskC();
-    QDir dir(path);
+        if(path.isEmpty())throw ExceptionFolderNotFound();
+    //if(path[0] == 'C' || path[0] == 'c')throw ExceptionFolderFromDiskC();
+        QDir dir(path);
     // Проверяем, существует ли папка
-    if (!dir.exists())throw ExceptionFolderNotFound();
-    if(checkSelfCrypt(dir.absolutePath()))throw ExceptionTryToSelfCrypting();
+        if (!dir.exists())throw ExceptionFolderNotFound();
+        if(checkSelfCrypt(dir.absolutePath()))throw ExceptionTryToSelfCrypting();
 
 
     // Получаем список всех файлов и папок (включая скрытые)
-    QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
+        QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
 
-    if(entries.size()==0)throw ExceptionFolderIsEmpty();
+        if(entries.size()==0)throw ExceptionFolderIsEmpty();
 
     // цикл по содержимому
-    for (const QFileInfo &entry : entries) {
+        for (const QFileInfo &entry : entries) {
             // если папка
             if (entry.isDir()) {
                 // проверка на то, что эта папка - на самом деле ярлык на папку
@@ -127,22 +127,23 @@ namespace {
 
                     // Рекурсивно обходим содержимое папки
                     listContents(entry.absoluteFilePath(), pathList); //indent + 1);
-                }else{
-
-                    // и НЕ продолжаем рекурсию
                 }
+                    // и НЕ продолжаем рекурсию
             } else {
                 // добавление файла в список файлов
                 // с проверкой на ярлык.lnk и системные атрибуты
+                // ( если ярлык или системные атрибуты - то файл игнорируется )
                 try{
-                    if(isSystemEntry(entry)) throw ExceptionPathFromSystemEntries();
+                    if(isSystemEntry(entry)){
+                        throw ExceptionPathFromSystemEntries();
+                    }
                     if(entry.suffix().toLower() != "lnk"){
                         pathList.push_back(entry.absoluteFilePath());
                     }
                 }catch (ExceptionPathFromSystemEntries &excp){
                     qDebug()<<(excp.what())<<"  Code: "<<excp.getCode();
                 }
-
+/*
                 // Выводим файл с информацией о размере
                 QString sizeStr;    // для вывода
                 qint64 size = entry.size();
@@ -156,6 +157,7 @@ namespace {
                 } else {
                     sizeStr = QString::number(size / (1024.0 * 1024.0 * 1024.0), 'f', 2) + " GB";
                 }
+*/
             }
     }
 }
