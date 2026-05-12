@@ -33,17 +33,16 @@
 #define EXCEPTION_INCORRECT_PASSWORD 3004       // введён неверный пароль ( для дешифрования )
 #define EXCEPTION_LEN_PASSWORD_OUT_OF_BOUNDS 3005 // пароль слишком короткий или слишком длинный
 
-#define EXCEPTION_FOLDER_NOT_FOULD 10001
+#define EXCEPTION_FOLDER_NOT_FOUND 10001
 #define EXCEPTION_FOLDER_FROM_DISK_C 10002
 #define EXCEPTION_FOLDER_IS_EMPTY 10003
-#define EXCEPTION_PATH_DOT_OR_DOTDOT 10004
 #define EXCEPTION_PATH_FROM_SYSTEM_ENTRIES 10005
-
+#define EXCPETION_TRY_TO_SELFCRYPTING 10006
 
 /* Исключение: папка не найдена */
-class ExceptionFolderNotFould : public CustomExceptions {
+class ExceptionFolderNotFound : public CustomExceptions {
 public:
-    ExceptionFolderNotFould() : CustomExceptions(EXCEPTION_FOLDER_NOT_FOULD, "Error: folder not found!"){}
+    ExceptionFolderNotFound() : CustomExceptions(EXCEPTION_FOLDER_NOT_FOUND, "Error: folder not found!"){}
 };
 
 /* Исключение: папка из диска С */
@@ -58,11 +57,6 @@ public:
     ExceptionFolderIsEmpty() : CustomExceptions(EXCEPTION_FOLDER_IS_EMPTY, "Warning! Folder is empty!") {}
 };
 
-/* Исключение: путь введён как '.' или '..' */
-class ExceptionDotOrDotDot : public CustomExceptions {
-public:
-    ExceptionDotOrDotDot() : CustomExceptions(EXCEPTION_PATH_DOT_OR_DOTDOT, "Warning! Path contains '.' or '..'!") {}
-};
 
 /* Исключение: путь к папке внутри системного пространства */
 class ExceptionPathFromSystemEntries : public CustomExceptions {
@@ -222,5 +216,11 @@ public:
 class ExceptionFileIsEmpty : public CustomExceptions {
 public:
     ExceptionFileIsEmpty() : CustomExceptions(EXCEPTION_FILE_IS_EMPTY, "Warning: file is empty!") {}
+};
+
+/* Исключение: попытка зашифровки\дешифровки пути с приложением */
+class ExceptionTryToSelfCrypting : public CustomExceptions {
+public:
+    ExceptionTryToSelfCrypting() : CustomExceptions(EXCPETION_TRY_TO_SELFCRYPTING, "Warning: trying to enter path with an application!") {}
 };
 

@@ -35,9 +35,9 @@ private:
 
     // запрет на копирование
     CryptoActionsAES(const CryptoActionsAES&) = delete;
+    CryptoActionsAES& operator=(CryptoActionsAES const&) = delete; // и присваивание
     CryptoActionsAES() {}    // конструктор без реализации
     ~CryptoActionsAES() {}    // и деструктор
-    CryptoActionsAES& operator=(CryptoActionsAES const&) = delete; // и присваивание
 
 public:
 
